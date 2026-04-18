@@ -7,7 +7,7 @@ export default function WeatherApp() {
   const [loading, setLoading] = useState(false); // 加载状态
 
   // 你的 API Key
-  const API_KEY = 'ae1e65825b81fe432de8e2c5bba85815'; 
+  const API_KEY = process.env.EXPO_PUBLIC_WEATHER_API_KEY; 
 
   const fetchWeather = async () => {
     if (!city) return;
