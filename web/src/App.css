@@ -1,0 +1,130 @@
+/* 全局重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background-color: #f0f4f8;
+}
+
+/* 1. 主容器 Flex 布局（左右分栏） */
+.page-container {
+  display: flex;
+  gap: 30px;
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 左边：实时天气卡片 */
+.weather-left {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.temp {
+  font-size: 48px;
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+.desc {
+  font-size: 20px;
+  margin-bottom: 20px;
+  text-transform: capitalize;
+}
+
+.favorite-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: white;
+  color: #667eea;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 右边：预报 + 搜索 */
+.forecast-right {
+  flex: 2;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* 搜索框 */
+.search-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.search-box input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.search-box button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #667eea;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* 2. 预报列表 Flex 布局（横向排列） */
+.forecast-list {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.day {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  flex: 1;
+}
+
+.day img {
+  width: 50px;
+  height: 50px;
+}
+
+/* 收藏列表 */
+.favorites {
+  margin-top: 30px;
+}
+
+.fav-list {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.fav-list button {
+  padding: 8px 16px;
+  border: 1px solid #667eea;
+  border-radius: 20px;
+  background: white;
+  color: #667eea;
+  cursor: pointer;
+}
