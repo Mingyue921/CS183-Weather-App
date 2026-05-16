@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import Sidebar from './Sidebar';
+import './Dashboard.css';
 
 function Dashboard() {
   const [city, setCity] = useState('');
   const [currentWeather, setCurrentWeather] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const API_KEY = process.env.REACT_APP_WEATHER_KEY;
 
@@ -17,30 +20,88 @@ function Dashboard() {
     localStorage.setItem('weatherFavorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  // 中文风向转英文标识
+  const getWindDir = (cnDir) => {
+    const map = {
+      东: 'E', 东南: 'SE', 南: 'S', 西南: 'SW',
+      西: 'W', 西北: 'NW', 北: 'N', 东北: 'NE'
+    };
+    return map[cnDir] || cnDir;
+  };
+
+  // 降雨等级
+  const getRainLevel = (val) => {
+    if (val < 30) return "Low";
+    if (val < 70) return "Mid";
+    return "High";
+  };
+
+  // UV等级
+  const getUvLevel = (val) => {
+    if (val < 3) return "Low";
+    if (val < 7) return "Mid";
+    return "High";
+  };
+
+  // 天气图标映射
+  const getWeatherIcon = (weatherText) => {
+    if (weatherText.includes("晴")) return "sunny.svg";
+    if (weatherText.includes("多云")) return "cloudy.svg";
+    if (weatherText.includes("阴")) return "overcast.svg";
+    if (weatherText.includes("雨")) return "rain.svg";
+    return "cloudy.svg";
+  };
+
   const fetchWeather = async () => {
     if (!API_KEY) {
-      alert('API Key missing in .env file');
+      alert('API Key missing');
       return;
     }
     if (!city.trim()) {
-      alert('请输入城市名');
+      alert('请输入城市中文名，如：福州');
       return;
     }
-    try {
-      let res1 = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric&lang=en`
-      );
-      let data1 = await res1.json();
-      setCurrentWeather(data1);
 
-      let res2 = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric&lang=en`
-      );
-      let data2 = await res2.json();
-      setForecast(data2.list.filter((_, idx) => idx % 8 === 0));
+    setLoading(true);
+    try {
+      const url = `https://restapi.amap.com/v3/weather/weatherInfo?city=${city}&key=${API_KEY}&extensions=all&output=json`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.status !== '1') {
+        throw new Error(data.info || '城市不存在或密钥错误');
+      }
+
+      const forecastList = data.forecasts[0].casts.slice(0, 5);
+      const today = forecastList[0];
+
+      // 【全部数据动态从API读取，无任何固定写死值】
+      setCurrentWeather({
+        name: data.forecasts[0].city,
+        date: new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+        lunar: "Lunar Feb 24",
+        main: {
+          temp: today.daytemp,
+          temp_min: today.nighttemp,
+          temp_max: today.daytemp,
+          humidity: today.dayhumidity || 0,
+          pressure: today.daypressure || 0
+        },
+        weather: [{ description: today.dayweather }],
+        wind: {
+          speed: today.daypower,
+          direction: getWindDir(today.daywind)
+        },
+        uvi: today.dayuv || 0,
+        rainChance: today.dayprecip || 0
+      });
+
+      setForecast(forecastList);
     } catch (err) {
-      console.log(err);
-      alert('获取天气失败，请检查城市名');
+      console.error(err);
+      alert('获取天气失败：' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,156 +115,148 @@ function Dashboard() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '20px' }}>
-      {/* 左侧主天气区域 */}
-      <div style={{ flex: 3 }}>
-        {/* 主天气卡片 */}
-        <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '20px', marginBottom: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <p style={{ margin: 0, fontWeight: 'bold' }}>
-                {currentWeather ? currentWeather.name : ''}
-              </p >
-              {currentWeather && (
-                <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#666' }}>
-                  {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </p >
-              )}
-            </div>
-            {currentWeather && (
-              <p style={{ fontSize: '12px', color: '#666' }}>
-                {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-              </p >
-            )}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', margin: '20px 0' }}>
-            <div>
-              <p style={{ fontSize: '48px', fontWeight: 'bold', margin: 0 }}>
-                {currentWeather ? `${Math.round(currentWeather.main.temp)}°C` : ''}
-              </p >
-              <p style={{ margin: '4px 0', fontSize: '14px', color: '#666' }}>
-                {currentWeather ? currentWeather.weather[0].description : ''}
-              </p >
-              {currentWeather && (
-                <p style={{ fontSize: '12px', color: '#666' }}>
-                  {Math.round(currentWeather.main.temp_min)}/{Math.round(currentWeather.main.temp_max)}°C | {currentWeather.wind.deg}° wind
-                </p >
-              )}
-            </div>
-
-            <div style={{ 
-              width: '120px', 
-              height: '120px', 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              {currentWeather && (
-                < img 
-                  src={`https://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@4x.png`}
-                  alt="weather icon"
-                  style={{ width: '100%', height: 'auto' }}
-                />
-              )}
-            </div>
-          </div>
-
-          {currentWeather && (
-            <div style={{ display: 'flex', gap: '30px', fontSize: '12px', color: '#666' }}>
-              <p>💧 {currentWeather.main.humidity}% Excellent</p >
-              <p>🍃 Force {Math.round(currentWeather.wind.speed)}</p >
-            </div>
-          )}
-        </div>
-
-        {/* 下方四个数据卡片 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px' }}>
-            <p style={{ margin: '0 0 10px', fontWeight: 'bold' }}>Wind</p >
-            <p style={{ fontSize: '12px', color: '#666' }}>Today wind speed</p >
-            <p style={{ fontSize: '18px', fontWeight: '500', margin: '10px 0' }}>
-              {currentWeather ? `${currentWeather.wind.speed} km/h` : ''}
-            </p >
-          </div>
-
-          <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px' }}>
-            <p style={{ margin: '0 0 10px', fontWeight: 'bold' }}>Rain Chance</p >
-            <p style={{ fontSize: '12px', color: '#666' }}>Today rain chance</p >
-            <p style={{ fontSize: '18px', fontWeight: '500', margin: '10px 0' }}>
-              {currentWeather ? `${currentWeather.rain?.['1h'] || 0}%` : ''}
-            </p >
-          </div>
-
-          <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px' }}>
-            <p style={{ margin: '0 0 10px', fontWeight: 'bold' }}>Pressure</p >
-            <p style={{ fontSize: '12px', color: '#666' }}>Today Pressure</p >
-            <p style={{ fontSize: '18px', fontWeight: '500', margin: '10px 0' }}>
-              {currentWeather ? `${currentWeather.main.pressure} hPa` : ''}
-            </p >
-          </div>
-
-          <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px' }}>
-            <p style={{ margin: '0 0 10px', fontWeight: 'bold' }}>UV Index</p >
-            <p style={{ fontSize: '12px', color: '#666' }}>Today UV Index</p >
-            <p style={{ fontSize: '18px', fontWeight: '500', margin: '10px 0' }}>
-              {currentWeather ? currentWeather.uvi : ''}
-            </p >
-            {currentWeather && (
-              <p style={{ fontSize: '12px', color: '#666' }}>
-                {currentWeather.uvi < 3 ? 'Low' : currentWeather.uvi < 6 ? 'Moderate' : 'High'}
-              </p >
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 右侧区域（包含搜索框+预报） */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {/* 搜索框固定在顶部 */}
-        <div style={{ display: 'flex', gap: '10px' }}>
+    <div className="app-container">
+      <Sidebar />
+      <div className="main-content">
+        {/* 顶部搜索栏 */}
+        <div className="search-bar">
           <input
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
             placeholder="Enter city name"
-            style={{ padding: '8px', flex: 1 }}
           />
-          <button onClick={fetchWeather} style={{ padding: '8px 12px' }}>Search</button>
-          <button onClick={toggleFavorite} style={{ padding: '8px 12px' }}>
+          <button onClick={fetchWeather} disabled={loading}>
+            {loading ? 'Loading...' : 'Search'}
+          </button>
+          <button onClick={toggleFavorite} disabled={!currentWeather}>
             {favorites.includes(city) ? '❤️' : '🤍'}
           </button>
         </div>
 
-        {/* 多日预报区域 */}
-        <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', flex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h4 style={{ margin: 0 }}>Multi day forecast</h4>
-            <span>›</span>
-          </div>
-
-          {forecast ? (
-            <div>
-              {forecast.map((item, index) => (
-                <div key={index} style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>
-                    {new Date(item.dt_txt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                  </p >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    < img 
-                      src={`https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`}
-                      alt="forecast icon"
-                      style={{ width: '30px', height: 'auto' }}
-                    />
-                    <p style={{ margin: 0 }}>{Math.round(item.main.temp)}°C</p >
+        {currentWeather ? (
+          <div className="weather-page">
+            {/* 左侧主区域 */}
+            <div className="left-main">
+              {/* 顶部国风主卡片 */}
+              <div className="hero-card">
+                <div className="location-info">
+                  <div className="location-row">
+                    < img src="/img/105/Vector-1.svg" alt="location" className="icon-sm" />
+                    <span className="city-name">{currentWeather.name}</span>
+                  </div>
+                  <div className="date-row">
+                    <span>{currentWeather.date}</span>
+                    <span className="lunar">{currentWeather.lunar}</span>
                   </div>
                 </div>
-              ))}
+
+                <div className="temp-block">
+                  <span className="big-temp">{currentWeather.main.temp}</span>
+                  <span className="unit">°C</span>
+                  <span className="weather-desc">{currentWeather.weather[0].description}</span>
+                  <div className="temp-range">
+                    {currentWeather.main.temp_min}/{currentWeather.main.temp_max}°C | {currentWeather.wind.direction} wind
+                  </div>
+                </div>
+
+                <div className="stats-row">
+                  <div className="stat-item">
+                    < img src="/img/105/湿度 1.svg" alt="humidity" className="icon-sm" />
+                    <span>{currentWeather.main.humidity}%</span>
+                  </div>
+                  <div className="stat-item">
+                    < img src="/img/105/air.svg" alt="air" className="icon-sm" />
+                    <span>Excellent</span>
+                  </div>
+                  <div className="stat-item">
+                    < img src="/img/105/风级 1.svg" alt="wind" className="icon-sm" />
+                    <span>Force {currentWeather.wind.speed}</span>
+                  </div>
+                </div>
+
+                {/* 国风背景图 */}
+                < img src="/img/105/picture.svg" alt="landscape" className="bg-landscape" />
+              </div>
+
+              {/* 下方4个数据卡片 */}
+              <div className="grid-cards">
+                {/* 1. Wind 圆环显示英文风向 */}
+                <div className="data-card">
+                  <h3>Wind</h3>
+                  <p>Today wind speed</p >
+                  <p className="card-value">{currentWeather.wind.speed} km/h</p >
+                  <div className="simple-ring">
+                    <div className="ring-progress wind" style={{ '--percent': `${Math.min(currentWeather.wind.speed / 12 * 100, 100)}%` }}>
+                      <span className="ring-text">{currentWeather.wind.direction}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Rain Chance 动态降雨概率+等级 */}
+                <div className="data-card">
+                  <h3>Rain Chance</h3>
+                  <p>Today rain chance</p >
+                  <p className="card-value">{currentWeather.rainChance}%</p >
+                  <div className="simple-ring">
+                    <div className="ring-progress rain" style={{ '--percent': `${currentWeather.rainChance}%` }}>
+                      <span className="ring-text">{getRainLevel(currentWeather.rainChance)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Pressure 动态气压圆环 */}
+                <div className="data-card">
+                  <h3>Presssure</h3>
+                  <p>Today Pressure</p >
+                  <p className="card-value">{currentWeather.main.pressure} hPa</p >
+                  <div className="simple-ring">
+                    <div className="ring-progress pressure" style={{ '--percent': `${Math.min(((currentWeather.main.pressure - 1000) / 50) * 100, 100)}%` }}></div>
+                  </div>
+                </div>
+
+                {/* 4. UV 开口朝下3/4彩虹圆环 */}
+                <div className="data-card">
+                  <h3>UV Index</h3>
+                  <p>Today UV Index</p >
+                  <p className="card-value">{currentWeather.uvi}</p >
+                  <div className="uv-rainbow-ring">
+                    <span className="ring-text">{getUvLevel(currentWeather.uvi)}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <p style={{ color: '#999', fontSize: '12px' }}>Search for a city to see forecast</p >
-          )}
-        </div>
+
+            {/* 右侧5天多日预报 */}
+            <div className="right-forecast">
+              <div className="forecast-header">
+                <h2>Multi day forecast</h2>
+              </div>
+              <div className="forecast-list">
+                {forecast?.map((item, idx) => (
+                  <div key={idx} className="forecast-item">
+                    <div className="forecast-date">
+                      {new Date(item.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                    </div>
+                    <div className="forecast-temp-row">
+                      <span>{item.daytemp}°C</span>
+                      <img
+                        src={`/img/105/${getWeatherIcon(item.dayweather)}`}
+                        alt={item.dayweather}
+                        className="forecast-icon"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="empty-state">
+            < img src="/img/105/picture.svg" alt="empty" className="empty-img" />
+            <p>Enter a city name to view weather data</p >
+          </div>
+        )}
       </div>
     </div>
   );

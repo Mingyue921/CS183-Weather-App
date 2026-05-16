@@ -1,26 +1,27 @@
-import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Dashboard from './Dashboard';
+import AiHelper from './AiHelper';
 import SavedLocation from './SavedLocation';
 import Calendar from './Calendar';
-import AiHelper from './AiHelper';
 import Settings from './Settings';
-import './App.css';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('dashboard');
-
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      <div style={{ flex: 1, padding: '20px', backgroundColor: '#f9f9f9' }}>
-        {currentPage === 'dashboard' && <Dashboard />}
-        {currentPage === 'saved' && <SavedLocation />}
-        {currentPage === 'calendar' && <Calendar />}
-        {currentPage === 'ai' && <AiHelper />}
-        {currentPage === 'settings' && <Settings />}
+    <Router>
+      <div style={{ display: 'flex' }}>
+        <Sidebar />
+        <div style={{ flex: 1, padding: '20px' }}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/aihelper" element={<AiHelper />} />
+            <Route path="/savedlocation" element={<SavedLocation />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </div>
       </div>
-    </div>
+    </Router>
   );
 }
 

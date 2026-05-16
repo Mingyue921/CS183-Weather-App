@@ -1,250 +1,307 @@
-/* 整体布局 */
-.dashboard-wrapper {
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.app-container {
   display: flex;
-  gap: 20px;
-  padding: 20px;
-  /* 这里就是你Figma的渐变背景 */
-  background: linear-gradient(
-    180deg, /* 从上到下的渐变方向 */
-    #FDF8ED,
-    #FCF1DF,
-    #FBEDD8,
-    #FBE9D1,
-    #F8DAB6
-  );
   min-height: 100vh;
-  position: relative;
+  background: linear-gradient(180deg, #FFF6E9 0%, #FFEAD8 100%);
 }
 
-/* 顶部搜索栏 */
-.top-controls {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
-  display: flex;
-  gap: 10px;
-  z-index: 10;
-}
-
-.city-input {
+.main-content {
   flex: 1;
-  max-width: 300px;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: rgba(255,255,255,0.8);
+  margin-left: 302px;
+  padding: 32px 40px;
 }
 
-.search-btn, .favorite-btn {
-  padding: 8px 16px;
+/* 搜索栏 */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  align-items: center;
+}
+
+.search-bar input {
+  padding: 12px 18px;
+  border-radius: 14px;
   border: none;
-  border-radius: 8px;
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  width: 280px;
+}
+
+.search-bar button {
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: #FF9A3C;
+  color: white;
+  border: none;
   cursor: pointer;
 }
 
-.search-btn {
-  background-color: #f5d09e;
-  color: #333;
+/* 整体左右布局 */
+.weather-page {
+  display: grid;
+  grid-template-columns: 70% 30%;
+  gap: 24px;
 }
 
-.favorite-btn {
-  background-color: transparent;
-  font-size: 18px;
-}
-
-/* 左侧主天气卡片 */
-.main-weather-card {
-  flex: 2;
-  /* 这里改成你Figma的渐变，让卡片和背景更融合 */
-  background: linear-gradient(
-    135deg, /* 斜向渐变，和你设计稿更像 */
-    #FDF8ED,
-    #FBE9D1
-  );
-  border-radius: 16px;
-  padding: 24px;
-  margin-top: 60px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-.card-header {
+/* 左侧主区域 */
+.left-main {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.city-name {
-  margin: 0;
-  font-size: 14px;
-  color: #333;
+/* 顶部国风大卡片 */
+.hero-card {
+  background: #FBFEF0;
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
 }
 
-.date {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: #888;
+.bg-landscape {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  opacity: 0.85;
+  pointer-events: none;
 }
 
-.header-icons {
-  display: flex;
-  gap: 16px;
-}
-
-/* 主温度区域 */
-.weather-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.temperature {
-  font-size: 48px;
-  font-weight: bold;
-  margin: 0;
-  color: #333;
-}
-
-.weather-desc {
-  margin: 4px 0;
-  font-size: 14px;
-  color: #666;
-}
-
-.weather-details {
-  margin: 0;
-  font-size: 12px;
-  color: #888;
-}
-
-.weather-illustration {
-  width: 180px;
-  height: 120px;
-  background-image: url('https://via.placeholder.com/180x120?text=Illustration');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: right center;
-}
-
-/* 天气详情行 */
-.weather-metrics {
-  display: flex;
-  gap: 40px;
-  margin-bottom: 24px;
-}
-
-.metric-item {
+.location-row {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
 }
 
-.metric-text {
+.date-row {
   font-size: 14px;
-  font-weight: 500;
+  color: #777;
 }
 
-.metric-status {
-  font-size: 12px;
-  color: #4CAF50;
+.lunar {
+  margin-left: 12px;
 }
 
-/* 下方数据网格 */
-.data-grid {
+.temp-block {
+  margin: 24px 0;
+}
+
+.big-temp {
+  font-size: 80px;
+  font-weight: 700;
+  color: #4A7C59;
+  line-height: 1;
+}
+
+.unit {
+  font-size: 24px;
+  color: #4A7C59;
+}
+
+.weather-desc {
+  display: block;
+  font-size: 18px;
+  color: #555;
+  margin: 8px 0;
+}
+
+.temp-range {
+  font-size: 15px;
+  color: #888;
+}
+
+.stats-row {
+  display: flex;
+  gap: 32px;
+  margin-top: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: #555;
+}
+
+.icon-sm {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* 下方4个数据卡片网格 —— 已加深背景色对齐Figma */
+.grid-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
 .data-card {
-  background-color: rgba(255,255,255,0.6);
-  border-radius: 12px;
-  padding: 16px;
+  background: #F8E0C9;
+  border-radius: 20px;
+  padding: 24px;
+  position: relative;
 }
 
-.card-label {
-  font-size: 12px;
-  color: #888;
-  margin: 0 0 8px;
+.data-card h3 {
+  font-size: 16px;
+  color: #664E3A;
+  margin-bottom: 8px;
+}
+
+.data-card p {
+  font-size: 13px;
+  color: #997A5F;
+  margin-bottom: 12px;
 }
 
 .card-value {
-  font-size: 16px;
-  font-weight: 500;
-  margin: 0 0 8px;
-}
-
-.compass {
-  width: 40px;
-  height: 40px;
-  border: 1px solid #ddd;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: #666;
-}
-
-.card-level {
-  font-size: 12px;
-  color: #d35400;
-}
-
-/* 右侧预报面板 */
-.forecast-panel {
-  flex: 1;
-  background-color: #fff9e6;
-  border-radius: 16px;
-  padding: 20px;
-  margin-top: 60px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.panel-header h4 {
-  margin: 0;
-  font-size: 14px;
+  font-size: 20px;
+  font-weight: 600;
   color: #333;
 }
 
-.arrow {
-  color: #888;
+/* 右侧预报栏 */
+.right-forecast {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: 32px;
+  height: 100%;
+}
+
+.forecast-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.forecast-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .forecast-item {
-  margin-bottom: 16px;
-}
-
-.day-label {
-  font-size: 12px;
-  color: #888;
-  margin: 0 0 8px;
-}
-
-.forecast-times {
   display: flex;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
-.time-item {
-  text-align: center;
+.forecast-date {
+  font-size: 14px;
+  color: #555;
 }
 
-.time-item p {
-  margin: 0;
+.forecast-temp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.forecast-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  color: #999;
+}
+
+.empty-img {
+  width: 180px;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+/* 简约圆环 + 内部文字样式 */
+.simple-ring {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #F8E0C9;
+  display: grid;
+  place-items: center;
+}
+
+.ring-progress {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(var(--ring-color) var(--percent), transparent 0);
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.ring-progress::after {
+  content: '';
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: #F8E0C9;
+}
+
+.ring-text {
+  position: absolute;
+  z-index: 2;
   font-size: 12px;
+  font-weight: 600;
+  color: #664E3A;
 }
 
-.time-item img {
-  width: 24px;
-  height: 24px;
+/* 四种配色 */
+.ring-progress.wind { --ring-color: #D49A6A; }
+.ring-progress.rain { --ring-color: #B88B63; }
+.ring-progress.pressure { --ring-color: #8C6A51; }
+
+/* UV 开口朝下 3/4 彩虹圆环 核心修复 */
+.uv-rainbow-ring {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  /* 开口朝下：裁剪掉底部1/4 */
+  clip-path: polygon(0 0, 100% 0, 100% 75%, 0 75%);
+  background: conic-gradient(from 135deg, #4ECDC4 0%, #FFD166 50%, #FF6B6B 100%);
+  display: grid;
+  place-items: center;
+}
+.uv-rainbow-ring::after {
+  content: '';
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: #F8E0C9;
 }

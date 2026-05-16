@@ -1,40 +1,68 @@
 import React from 'react';
+import './Sidebar.css';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-function Sidebar({ currentPage, setCurrentPage }) {
-  const menuList = [
-    { id: 'dashboard', name: 'Dashboard' },
-    { id: 'ai', name: 'AI Helper' },
-    { id: 'saved', name: 'Saved Location' },
-    { id: 'calendar', name: 'Calendar' },
-    { id: 'settings', name: 'Settings' }
-  ];
+const Sidebar = () => {
+  const navigate = useNavigate();
+  // 获取当前页面路径，用来自动高亮
+  const location = useLocation();
 
   return (
-    <div style={{
-      width: '200px',
-      background: '#f5f5f5',
-      height: '100vh',
-      padding: '20px',
-      boxSizing: 'border-box'
-    }}>
-      <h3>Weather App</h3>
-      {menuList.map(item => (
-        <div
-          key={item.id}
-          onClick={() => setCurrentPage(item.id)}
-          style={{
-            padding: '10px 12px',
-            margin: '8px 0',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            background: currentPage === item.id ? '#ddd' : 'transparent'
-          }}
+    <div className="sidebar">
+      <div className="sidebar-header">
+        < img src="/img/105/Ellipse 3.svg" alt="Logo" className="logo-icon" />
+        <span className="logo-text">Climate</span>
+      </div>
+
+      <nav className="sidebar-menu">
+        {/* 自动判断是否当前页，自动加 active 高亮 */}
+        <div 
+          className={`menu-item ${location.pathname === '/' ? 'active' : ''}`}
+          onClick={() => navigate('/')}
         >
-          {item.name}
+          < img src="/img/105/dashboard 1.svg" alt="icon" />
+          <span>Dashboard</span>
         </div>
-      ))}
+
+        <div 
+          className={`menu-item ${location.pathname === '/aihelper' ? 'active' : ''}`}
+          onClick={() => navigate('/aihelper')}
+        >
+          < img src="\img\105\AI助手@2x 1.svg" alt="icon" />
+          <span>AI Helper</span>
+        </div>
+
+        <div 
+          className={`menu-item ${location.pathname === '/savedlocation' ? 'active' : ''}`}
+          onClick={() => navigate('/savedlocation')}
+        >
+          < img src="\img\105\收藏 (2) 1.svg" alt="icon" />
+          <span>Saved Location</span>
+        </div>
+
+        <div 
+          className={`menu-item ${location.pathname === '/calendar' ? 'active' : ''}`}
+          onClick={() => navigate('/calendar')}
+        >
+          < img src="\img\105\日历 1.svg" alt="icon" />
+          <span>Calendar</span>
+        </div>
+
+        <div 
+          className={`menu-item ${location.pathname === '/settings' ? 'active' : ''}`}
+          onClick={() => navigate('/settings')}
+        >
+          < img src="/img/105/vector-2.svg" alt="icon" />
+          <span>Settings</span>
+        </div>
+      </nav>
+
+      <div className="sidebar-logout">
+        < img src="/img/105/退出登录 (2) 1.svg" alt="Logout" />
+        <span>Log Out</span>
+      </div>
     </div>
   );
-}
+};
 
 export default Sidebar;
