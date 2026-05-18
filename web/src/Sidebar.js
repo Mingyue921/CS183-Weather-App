@@ -49,11 +49,11 @@ const Sidebar = () => {
         </div>
 
         <div 
-          className={`menu-item ${location.pathname === '/settings' ? 'active' : ''}`}
-          onClick={() => navigate('/settings')}
+          className={`menu-item ${location.pathname === '/setting' ? 'active' : ''}`}
+          onClick={() => navigate('/setting')}
         >
           < img src="/img/105/vector-2.svg" alt="icon" />
-          <span>Settings</span>
+          <span>Setting</span>
         </div>
       </nav>
 

@@ -1,0 +1,216 @@
+/* 外层容器完全照搬 Dashboard 结构 */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #FFF8E3;
+  overflow: hidden;
+}
+
+/* 核心边距，和 Dashboard 完全一致 */
+.main-content {
+  flex: 1;
+  margin-left: 302px;
+  padding: 32px 40px;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.setting-page {
+  width: 100%;
+}
+
+/* 顶部栏 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.header-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+.avatar-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+.header-right {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+/* 用户卡片 */
+.user-card {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.user-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.user-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.user-name {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  color: #554433;
+}
+.vip-tag {
+  background: #f7d89c;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #996600;
+}
+.user-id {
+  font-size: 14px;
+  color: #997A5F;
+  margin: 6px 0;
+}
+.progress-bar {
+  width: 180px;
+  height: 8px;
+  background: #eee;
+  border-radius: 4px;
+  position: relative;
+  margin: 8px 0;
+}
+.progress-fill {
+  width: 63%;
+  height: 100%;
+  background: #D4B078;
+  border-radius: 4px;
+}
+.progress-text {
+  position: absolute;
+  right: -30px;
+  top: -6px;
+  font-size: 12px;
+  color: #997A5F;
+}
+.expire-text {
+  font-size: 13px;
+  color: #997A5F;
+  margin: 0;
+}
+
+/* 左右双栏布局 */
+.two-column-container {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 20px;
+}
+.left-column, .right-column {
+  flex: 1;
+}
+
+/* 区域标题 */
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #997A5F;
+  margin: 0 0 12px;
+}
+
+/* ========== 核心修改：统一卡片大小 + 左上对齐 + 浅棕色文字 ========== */
+/* 左栏 Living Index 3列网格 */
+.index-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.index-item {
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  /* 固定统一高度，所有块大小完全一致 */
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  /* 图标+文字 左上对齐 */
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid #F0E6D2;
+}
+
+/* 右栏 My Service 2列网格 */
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.service-item {
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  /* 和左边卡片完全一样高 */
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  /* 左上对齐 */
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid #F0E6D2;
+}
+
+/* 上方按钮 emoji 样式保持不变 */
+.item-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+/* 按钮内文字：浅棕色，和参考图一致 */
+.index-item span:last-child,
+.service-item span:last-child {
+  color: #997A5F;
+  font-size: 14px;
+}
+
+/* 设置列表 */
+.setting-list {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #F0E6D2;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid #F5EFE0;
+  gap: 12px;
+}
+.setting-row:last-child {
+  border-bottom: none;
+}
+
+/* 仅此处修改为 SVG 图标样式，适配你下面5个图标 */
+.row-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.setting-row span:nth-child(2) {
+  color: #997A5F;
+}
+.arrow {
+  margin-left: auto;
+  color: #D4B078;
+}
