@@ -1,0 +1,19 @@
+{
+  "name": "cs183-ai-service",
+  "version": "1.0.0",
+  "description": "AI weather advice service for CS183",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --watch --config jest.config.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.0",
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
