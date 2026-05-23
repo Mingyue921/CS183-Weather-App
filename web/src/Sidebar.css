@@ -44,19 +44,25 @@
   padding: 14px 32px;
   border-radius: 12px;
   cursor: pointer;
-  color: #666;
+  color: #b8b8b8;
   font-size: 15px;
 }
 
 .menu-item.active {
-  background: #f5f5f5;
-  color: #222;
+  background: #FCF0DF;
+  color: #BD9556;
+  font-weight: bold;
 }
 
 .menu-item img {
   width: 24px;
   height: 24px;
   object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(74%) sepia(0%) saturate(0%) hue-rotate(181deg) brightness(94%) contrast(90%);
+}
+
+.menu-item.active img {
+  filter: brightness(0) saturate(100%) invert(61%) sepia(26%) saturate(789%) hue-rotate(356deg) brightness(92%) contrast(89%);
 }
 
 .sidebar-logout {
@@ -74,8 +80,4 @@
 .sidebar-logout img {
   width: 24px;
   height: 24px;
-}
-.menu-item.active {
-  background-color: #FCF0DF; /* 高亮背景色，和你现在设计一致即可 */
-  font-weight: bold;
 }

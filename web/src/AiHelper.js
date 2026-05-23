@@ -1,52 +1,76 @@
 import React, { useState } from 'react';
+import './AiHelper.css';
+
+const iconBase = '/img/105';
 
 function AiHelper() {
   const [msg, setMsg] = useState('');
 
-  return (
-    <div>
-      <h2>AI Weather Helper</h2>
-      <p style={{marginBottom:'20px'}}>Ask anything about weather</p >
+  const suggestions = [
+    'What is suitable to wear today?',
+    'Will it rain in the next few hours?',
+    'Help me compare the weather between A and B.',
+  ];
 
-      <div style={{marginBottom:'30px'}}>
+  return (
+    <main className="ai-helper-page">
+      <header className="ai-helper-topbar">
+        <button className="ai-icon-button" aria-label="Notifications">
+          <img src={`${iconBase}/%E9%93%83%E9%93%9B%20(3)%201.svg`} alt="" />
+        </button>
+        <div className="ai-avatar" aria-label="User avatar" />
+      </header>
+
+      <section className="ai-hero">
+        <div className="ai-hero-copy">
+          <h1>
+            Hello,
+            <span>How Can I Assist You Today?</span>
+          </h1>
+
+          <div className="ai-suggestions" aria-label="Suggested questions">
+            {suggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => setMsg(suggestion)}
+              >
+                <span>{suggestion}</span>
+                <span className="ai-arrow">&gt;</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="ai-robot-area" aria-hidden="true">
+          <div className="ai-speech-bubble">You can ask me like this!</div>
+          <img className="ai-robot" src={`${iconBase}/robot.svg`} alt="" />
+        </div>
+      </section>
+
+      <section className="ai-input-panel" aria-label="AI command input">
         <textarea
           value={msg}
-          onChange={(e) => setMsg(e.target.value)}
-          placeholder="Type your question here..."
-          style={{
-            width:'100%',
-            height:'120px',
-            padding:'10px',
-            borderRadius:'6px',
-            border:'1px solid #ccc'
-          }}
+          onChange={(event) => setMsg(event.target.value)}
+          placeholder="Initiate a query or send a command to the AI ......"
         />
-      </div>
 
-      <button
-        style={{
-          padding:'10px 25px',
-          border:'none',
-          borderRadius:'6px',
-          backgroundColor:'#ddd',
-          cursor:'pointer'
-        }}
-      >
-        Send to AI
-      </button>
+        <div className="ai-input-actions">
+          <button type="button" className="ai-link-button" aria-label="Attach a link">
+            <img src={`${iconBase}/link.svg`} alt="" />
+          </button>
 
-      <div style={{marginTop:'30px'}}>
-        <h4>AI Reply</h4>
-        <div style={{
-          border:'1px solid #ccc',
-          borderRadius:'6px',
-          padding:'15px',
-          minHeight:'80px'
-        }}>
-          AI answer will show here...
+          <div className="ai-send-actions">
+            <button type="button" className="ai-sound-button" aria-label="Voice input">
+              <img src={`${iconBase}/sound.svg`} alt="" />
+            </button>
+            <button type="button" className="ai-send-button" aria-label="Send message">
+              <img src={`${iconBase}/send.svg`} alt="" />
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
 
