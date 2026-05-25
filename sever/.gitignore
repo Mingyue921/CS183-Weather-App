@@ -1,3 +1,4 @@
 node_modules/
 .env
 src/data/users.local.json
+src/data/ai-responses.local.json

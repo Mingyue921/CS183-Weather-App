@@ -12,7 +12,7 @@ router.get('/current', async (req, res) => {
 
   try {
     const response = await fetch(
-      `${BASE_URL}/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric&lang=zh_cn`
+      `${BASE_URL}/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric&lang=en`
     );
     const data = await response.json();
     if (!response.ok) return res.status(response.status).json(data);
@@ -29,7 +29,7 @@ router.get('/forecast', async (req, res) => {
 
   try {
     const response = await fetch(
-      `${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric&lang=zh_cn`
+      `${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric&lang=en`
     );
     const data = await response.json();
     if (!response.ok) return res.status(response.status).json(data);
@@ -45,14 +45,22 @@ router.get('/forecast', async (req, res) => {
 // GET /api/weather/alerts?lat=26.08&lon=119.30
 router.get('/alerts', async (req, res) => {
   const { lat, lon } = req.query;
-  if (!lat || !lon) return res.status(400).json({ error: 'lat 和 lon 不能为空' });
+  if (!lat || !lon) return res.status(400).json({ error: 'lat and lon are required' });
+
+  if (!API_KEY) {
+    return res.json({
+      alerts: [],
+      warning: 'Weather alerts are unavailable because WEATHER_API_KEY is missing on the backend.',
+      unavailable: true,
+    });
+  }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 6000);
+  const timeout = setTimeout(() => controller.abort(), 5000);
 
   try {
     const response = await fetch(
-      `${ONECALL_URL}?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&appid=${API_KEY}&units=metric&lang=zh_cn`,
+      `${ONECALL_URL}?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&appid=${API_KEY}&units=metric&lang=en&exclude=current,minutely,hourly,daily`,
       { signal: controller.signal }
     );
     const data = await response.json();
@@ -61,8 +69,8 @@ router.get('/alerts', async (req, res) => {
     res.json({
       alerts: (data.alerts || []).map((alert, index) => ({
         id: `${alert.sender_name || 'sender'}-${alert.start || index}-${alert.event || 'alert'}`,
-        sender: alert.sender_name || '气象部门',
-        event: alert.event || '天气预警',
+        sender: alert.sender_name || 'Meteorological Department',
+        event: alert.event || 'Weather Alert',
         start: alert.start,
         end: alert.end,
         description: alert.description || '',
@@ -70,10 +78,11 @@ router.get('/alerts', async (req, res) => {
       })),
     });
   } catch (err) {
-    console.warn('获取天气预警失败:', err.message);
+    console.warn('Failed to fetch weather alerts:', err.message);
     res.json({
       alerts: [],
-      warning: '天气预警服务暂时不可用',
+      warning: 'Weather alert service is temporarily unavailable. This means the alert request failed, not that there are no alerts.',
+      unavailable: true,
     });
   } finally {
     clearTimeout(timeout);

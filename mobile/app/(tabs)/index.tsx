@@ -21,16 +21,16 @@ const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.0.2.2:30
 const DEFAULT_USER = {
   id: '0000001',
   email: '',
-  nickname: '晴天小暖',
+  nickname: 'Sunny Nuan',
   avatarUrl: '',
   favorites: [],
 };
 
 const ADVICE_TYPES: Record<string, string> = {
-  travel: '出行建议',
-  clothing: '穿衣建议',
-  activity: '活动建议',
-  diet: '饮食建议',
+  travel: 'Travel Advice',
+  clothing: 'Clothing Advice',
+  activity: 'Activity Advice',
+  diet: 'Food Advice',
 };
 
 const buildWeatherContext = (weatherData, location) => ({
@@ -56,7 +56,7 @@ const apiRequest = async (path: string, options: RequestInit = {}) => {
   const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.error || data.message || `请求失败 ${response.status}`);
+    throw new Error(data.error || data.message || `Request failed ${response.status}`);
   }
   return data;
 };
@@ -76,6 +76,55 @@ const getWeatherIconCode = (text = '') => {
   if (text.includes('云')) return '02d';
   return '01d';
 };
+
+const WEATHER_TEXT_MAP: Record<string, string> = {
+  '晴': 'Clear',
+  '少云': 'Few Clouds',
+  '晴间多云': 'Partly Cloudy',
+  '多云': 'Cloudy',
+  '阴': 'Overcast',
+  '阵雨': 'Showers',
+  '雷阵雨': 'Thunderstorm',
+  '小雨': 'Light Rain',
+  '中雨': 'Moderate Rain',
+  '大雨': 'Heavy Rain',
+  '暴雨': 'Rainstorm',
+  '小雪': 'Light Snow',
+  '中雪': 'Moderate Snow',
+  '大雪': 'Heavy Snow',
+  '雾': 'Fog',
+  '霾': 'Haze',
+};
+
+const translateWeatherText = (text = '') => WEATHER_TEXT_MAP[text] || text;
+
+const fetchJson = async (url: string) => {
+  const res = await fetch(url);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || data.message || `HTTP ${res.status}`);
+  }
+  return data;
+};
+
+const fetchJsonWithTimeout = async (url: string, timeoutMs = 6000) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error || data.message || `HTTP ${res.status}`);
+    }
+    return data;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const isAbortError = (error: unknown) => (
+  error instanceof Error && (error.name === 'AbortError' || error.message.toLowerCase().includes('aborted'))
+);
 
 const toNumber = (value: unknown, fallback = 0) => {
   const numberValue = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
@@ -97,6 +146,33 @@ const SOLAR_TERMS = [
   { name: '立冬', date: '11-07' }, { name: '小雪', date: '11-22' },
   { name: '大雪', date: '12-07' }, { name: '冬至', date: '12-21' }
 ];
+
+const SOLAR_TERM_LABELS: Record<string, string> = {
+  '立春': 'Start of Spring',
+  '雨水': 'Rain Water',
+  '惊蛰': 'the Waking of Insects',
+  '春分': 'Spring Equinox',
+  '清明': 'Pure Brightness',
+  '谷雨': 'Grain Rain',
+  '立夏': 'Start of Summer',
+  '小满': 'Grain Full',
+  '芒种': 'Grain in Ear',
+  '夏至': 'Summer Solstice',
+  '小暑': 'Lesser Heat',
+  '大暑': 'Greater Heat',
+  '立秋': 'Start of Autumn',
+  '处暑': 'End of Heat',
+  '白露': 'White Dew',
+  '秋分': 'Autumn Equinox',
+  '寒露': 'Cold Dew',
+  '霜降': 'Frost Descent',
+  '立冬': 'Start of Winter',
+  '小雪': 'Lesser Snow',
+  '大雪': 'Greater Snow',
+  '冬至': 'Winter Solstice',
+  '小寒': 'Lesser Cold',
+  '大寒': 'Greater Cold',
+};
 
 const SOLAR_TERM_IMAGES: Record<string, number> = {
   '立春': require('../../assets/solar-terms/lichun.png'),
@@ -181,6 +257,23 @@ const PROFILE_SETTING_ICONS: Record<string, string> = {
   '关于应用': '关于',
 };
 
+const PROFILE_SETTING_LABELS: Record<string, string> = {
+  '账号信息': 'Account Info',
+  '主题外观': 'Appearance',
+  '隐私安全': 'Privacy & Security',
+  '帮助与反馈': 'Help & Feedback',
+  '关于应用': 'About',
+};
+
+const CITY_SEARCH_ALIASES: Record<string, { query: string; displayName: string; district: string }> = {
+  fuzhou: { query: '福州市', displayName: 'Fuzhou', district: 'Fujian Province, Fuzhou City' },
+  'fu zhou': { query: '福州市', displayName: 'Fuzhou', district: 'Fujian Province, Fuzhou City' },
+  福州: { query: '福州市', displayName: 'Fuzhou', district: 'Fujian Province, Fuzhou City' },
+  福州市: { query: '福州市', displayName: 'Fuzhou', district: 'Fujian Province, Fuzhou City' },
+};
+
+const getCitySearchAlias = (keyword = '') => CITY_SEARCH_ALIASES[keyword.trim().toLowerCase()];
+
 const UiIcon = ({ name, size = 20, color = THEME.primary, bg = 'transparent', radius = 10 }: { name: string; size?: number; color?: string; bg?: string; radius?: number }) => {
   const iconModule = ICONS[name];
   const assetUri = iconModule ? Asset.fromModule(iconModule).uri : null;
@@ -204,9 +297,11 @@ export default function WeatherApp() {
   const [currentScreen, setCurrentScreen] = useState('Home'); 
   const [isLogged, setIsLogged] = useState(false);
   const [currentUser, setCurrentUser] = useState(DEFAULT_USER);
-  const [globalLocation, setGlobalLocation] = useState({ name: '福州市', lat: '26.08', lon: '119.30' });
+  const [globalLocation, setGlobalLocation] = useState({ name: 'Fuzhou', lat: '26.08', lon: '119.30' });
   const [weatherData, setWeatherData] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
+  const [weatherError, setWeatherError] = useState('');
+  const [weatherSource, setWeatherSource] = useState('');
   const [selectedSolarTerm, setSelectedSolarTerm] = useState('立春');
   const [selectedAdviceType, setSelectedAdviceType] = useState('travel');
   const [alertReturnScreen, setAlertReturnScreen] = useState('Home');
@@ -235,21 +330,19 @@ export default function WeatherApp() {
   useEffect(() => {
     const fetchAmapWeather = async () => {
       const geoUrl = `https://restapi.amap.com/v3/geocode/regeo?location=${globalLocation.lon},${globalLocation.lat}&key=${API_KEYS.AMAP}&extensions=base`;
-      const geoRes = await fetch(geoUrl);
-      const geoData = await geoRes.json();
+      const geoData = await fetchJsonWithTimeout(geoUrl, 5000);
       const adcode = geoData?.regeocode?.addressComponent?.adcode;
 
       if (!adcode) {
-        throw new Error('高德逆地理编码未返回城市编码');
+        throw new Error('Amap reverse geocoding did not return a city code');
       }
 
       const weatherUrl = `https://restapi.amap.com/v3/weather/weatherInfo?city=${adcode}&key=${API_KEYS.AMAP}&extensions=all`;
-      const weatherRes = await fetch(weatherUrl);
-      const amapData = await weatherRes.json();
+      const amapData = await fetchJsonWithTimeout(weatherUrl, 5000);
       const forecast = amapData?.forecasts?.[0];
 
       if (amapData.status !== '1' || !forecast?.casts?.length) {
-        throw new Error(amapData.info || '高德天气接口未返回天气数据');
+        throw new Error(amapData.info || 'Amap weather API did not return weather data');
       }
 
       const today = forecast.casts[0];
@@ -264,7 +357,7 @@ export default function WeatherApp() {
           humidity: 0,
           wind_speed: toNumber(today.daypower),
           uvi: 0,
-          weather: [{ description: currentWeather, icon: getWeatherIconCode(currentWeather) }]
+          weather: [{ description: translateWeatherText(currentWeather), icon: getWeatherIconCode(currentWeather) }]
         },
         daily: casts.map((day) => {
           const description = day.dayweather || day.nightweather || '晴';
@@ -274,7 +367,7 @@ export default function WeatherApp() {
               max: toNumber(day.daytemp),
               min: toNumber(day.nighttemp)
             },
-            weather: [{ description, icon: getWeatherIconCode(description) }]
+            weather: [{ description: translateWeatherText(description), icon: getWeatherIconCode(description) }]
           };
         })
       };
@@ -282,21 +375,31 @@ export default function WeatherApp() {
 
     const fetchWeather = async () => {
       setWeatherLoading(true);
+      setWeatherError('');
       try {
-        const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${globalLocation.lat}&lon=${globalLocation.lon}&appid=${API_KEYS.OPENWEATHER}&units=metric&lang=zh_cn`;
-        const res = await fetch(url);
-        if (!res.ok) {
-          throw new Error(`OpenWeather HTTP ${res.status}`);
-        }
-        const data = await res.json();
+        const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${globalLocation.lat}&lon=${globalLocation.lon}&appid=${API_KEYS.OPENWEATHER}&units=metric&lang=en`;
+        const data = await fetchJson(url);
         setWeatherData(data);
+        setWeatherSource('OpenWeather');
       } catch (e) {
-        console.warn("OpenWeather 获取失败，尝试使用高德天气兜底", e);
+        if (isAbortError(e)) {
+          console.warn("OpenWeather request was interrupted; Amap fallback was not used", e);
+          setWeatherError('OpenWeather request was interrupted. Please refresh or check the network.');
+          setWeatherSource('');
+          setWeatherLoading(false);
+          return;
+        }
+
+        console.warn("OpenWeather failed, using Amap fallback", e);
         try {
           const fallbackData = await fetchAmapWeather();
           setWeatherData(fallbackData);
+          setWeatherSource('Amap fallback');
         } catch (fallbackError) {
-          console.error("获取天气失败", fallbackError);
+          console.error("Failed to fetch weather", fallbackError);
+          setWeatherData(null);
+          setWeatherSource('');
+          setWeatherError('Unable to load weather. Please check the network or API keys.');
         }
       }
       setWeatherLoading(false);
@@ -318,15 +421,15 @@ export default function WeatherApp() {
       <View style={styles.customTabBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => navigate('Home')}>
           <UiIcon name="主页" size={22} color={currentScreen === 'Home' ? THEME.primary : '#ccc'} />
-          <Text style={[styles.tabText, { color: currentScreen === 'Home' ? THEME.primary : '#ccc' }]}>首页</Text>
+          <Text style={[styles.tabText, { color: currentScreen === 'Home' ? THEME.primary : '#ccc' }]}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => navigate('AI')}>
           <UiIcon name="AI" size={24} color={currentScreen === 'AI' ? THEME.primary : '#ccc'} />
-          <Text style={[styles.tabText, { color: currentScreen === 'AI' ? THEME.primary : '#ccc' }]}>AI对话</Text>
+          <Text style={[styles.tabText, { color: currentScreen === 'AI' ? THEME.primary : '#ccc' }]}>AI Chat</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => navigate(isLogged ? 'Profile' : 'Auth')}>
           <UiIcon name="我的" size={22} color={(currentScreen === 'Profile' || currentScreen === 'Auth') ? THEME.primary : '#ccc'} />
-          <Text style={[styles.tabText, { color: (currentScreen === 'Profile' || currentScreen === 'Auth') ? THEME.primary : '#ccc' }]}>我的</Text>
+          <Text style={[styles.tabText, { color: (currentScreen === 'Profile' || currentScreen === 'Auth') ? THEME.primary : '#ccc' }]}>Me</Text>
         </TouchableOpacity>
       </View>
     );
@@ -335,7 +438,7 @@ export default function WeatherApp() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: THEME.bg }}>
-        {currentScreen === 'Home' && <HomeScreen navigate={navigate} location={globalLocation} weatherData={weatherData} loading={weatherLoading} />}
+        {currentScreen === 'Home' && <HomeScreen navigate={navigate} location={globalLocation} weatherData={weatherData} loading={weatherLoading} error={weatherError} source={weatherSource} />}
         {currentScreen === 'AI' && <ChatScreen weatherData={weatherData} location={globalLocation} loading={weatherLoading} />}
         {currentScreen === 'Profile' && <ProfileScreen navigate={navigate} setIsLogged={setIsLogged} user={currentUser} setCurrentUser={setCurrentUser} />}
         {currentScreen === 'Auth' && <AuthScreen navigate={navigate} setIsLogged={setIsLogged} setCurrentUser={setCurrentUser} />}
@@ -355,7 +458,7 @@ export default function WeatherApp() {
 // ==========================================
 // 📱 页面 1：首页
 // ==========================================
-function HomeScreen({ navigate, location, weatherData, loading }) {
+function HomeScreen({ navigate, location, weatherData, loading, error, source }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const { term } = getSolarTermInfo(); 
 
@@ -381,7 +484,21 @@ function HomeScreen({ navigate, location, weatherData, loading }) {
     setIsFavorite(!isFavorite);
   };
 
-  if (loading || !weatherData) return <View style={styles.center}><ActivityIndicator size="large" color={THEME.primary}/></View>;
+  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color={THEME.primary}/></View>;
+
+  if (error || !weatherData) {
+    return (
+      <View style={[styles.center, { padding: 24 }]}>
+        <Text style={{ color: THEME.textDark, fontWeight: 'bold', fontSize: 18, textAlign: 'center' }}>Weather Unavailable</Text>
+        <Text style={{ color: THEME.textLight, marginTop: 10, textAlign: 'center', lineHeight: 20 }}>
+          {error || 'Unable to load weather data.'}
+        </Text>
+        <TouchableOpacity onPress={() => navigate('CitySearch')} style={[styles.primaryBtn, { alignSelf: 'center' }]}>
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Change City</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
@@ -398,6 +515,12 @@ function HomeScreen({ navigate, location, weatherData, loading }) {
         </TouchableOpacity>
       </View>
 
+      {source === 'Amap fallback' && (
+        <View style={styles.sourceNotice}>
+          <Text style={styles.sourceNoticeText}>Using fallback weather data because OpenWeather did not respond.</Text>
+        </View>
+      )}
+
       <View style={styles.card}>
         <View style={styles.mainWeatherTop}>
           <View>
@@ -410,28 +533,28 @@ function HomeScreen({ navigate, location, weatherData, loading }) {
         </View>
         <View style={styles.tempRangeBox}>
           <Text style={{color: THEME.textLight}}>
-            <Text style={{color: '#FF6B6B', fontWeight: 'bold'}}>{Math.round(weatherData.daily[0].temp.max)}°</Text> 最高   
-            <Text style={{color: THEME.blueText, fontWeight: 'bold'}}>  {Math.round(weatherData.daily[0].temp.min)}°</Text> 最低
+            <Text style={{color: '#FF6B6B', fontWeight: 'bold'}}>{Math.round(weatherData.daily[0].temp.max)}°</Text> High   
+            <Text style={{color: THEME.blueText, fontWeight: 'bold'}}>  {Math.round(weatherData.daily[0].temp.min)}°</Text> Low
           </Text>
-          <Text style={{color: THEME.textLight}}>体感温度 <Text style={{color: THEME.blueText, fontWeight: 'bold'}}>{Math.round(weatherData.current.feels_like)}°</Text></Text>
+          <Text style={{color: THEME.textLight}}>Feels like <Text style={{color: THEME.blueText, fontWeight: 'bold'}}>{Math.round(weatherData.current.feels_like)}°</Text></Text>
         </View>
         <View style={styles.detailsRow}>
-          <View style={styles.detailItem}><UiIcon name="湿度" size={16} color="#F5A14A"/><Text style={styles.detailTitle}>湿度</Text><Text style={styles.detailVal}>{weatherData.current.humidity ? `${weatherData.current.humidity}%` : '--'}</Text></View>
-          <View style={styles.detailItem}><UiIcon name="风速" size={16} color="#F5A14A"/><Text style={styles.detailTitle}>风速</Text><Text style={styles.detailVal}>{weatherData.current.wind_speed}m/s</Text></View>
-          <View style={styles.detailItem}><UiIcon name="防晒" size={16} color="#F5A14A"/><Text style={styles.detailTitle}>紫外线</Text><Text style={styles.detailVal}>{Math.round(weatherData.current.uvi)}</Text></View>
+          <View style={styles.detailItem}><UiIcon name="湿度" size={16} color="#F5A14A"/><Text style={styles.detailTitle}>Humidity</Text><Text style={styles.detailVal}>{weatherData.current.humidity ? `${weatherData.current.humidity}%` : '--'}</Text></View>
+          <View style={styles.detailItem}><UiIcon name="风速" size={16} color="#F5A14A"/><Text style={styles.detailTitle}>Wind</Text><Text style={styles.detailVal}>{weatherData.current.wind_speed}m/s</Text></View>
+          <View style={styles.detailItem}><UiIcon name="防晒" size={16} color="#F5A14A"/><Text style={styles.detailTitle}>UV</Text><Text style={styles.detailVal}>{Math.round(weatherData.current.uvi)}</Text></View>
         </View>
       </View>
 
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.cardTitle}>未来7日预报</Text>
+          <Text style={styles.cardTitle}>7-Day Forecast</Text>
           <UiIcon name="箭头" size={14} color="#ccc" />
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
           {weatherData.daily.slice(1, 8).map((day, i) => {
              const dateObj = new Date(day.dt * 1000);
             const dateStr = `${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
-            const displayDate = i === 0 ? '明天' : dateStr;
+            const displayDate = i === 0 ? 'Tomorrow' : dateStr;
             return (
               <View key={i} style={{ alignItems: 'center', marginRight: 28 }}>
                 <Text style={styles.detailTitle}>{displayDate}</Text>
@@ -445,22 +568,22 @@ function HomeScreen({ navigate, location, weatherData, loading }) {
 
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.cardTitle}>生活指数</Text>
+          <Text style={styles.cardTitle}>Lifestyle</Text>
           <UiIcon name="箭头" size={14} color="#ccc" />
         </View>
         <View style={styles.lifeIndexGrid}>
-          <TouchableOpacity style={styles.lifeItem} onPress={() => navigate('WeatherAlerts', { returnTo: 'Home' })}><UiIcon name="预警" size={20} color="#F5A14A" bg="#FFF4E6" /><Text style={styles.lifeText}>预警</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.lifeItem} onPress={() => navigate('AdviceDetail', { adviceType: 'travel' })}><UiIcon name="车" size={20} color="#4CAF50" bg="#E8F5E9" /><Text style={styles.lifeText}>出行</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.lifeItem} onPress={() => navigate('AdviceDetail', { adviceType: 'clothing' })}><UiIcon name="衣" size={20} color="#E91E63" bg="#FCE4EC" /><Text style={styles.lifeText}>穿衣</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.lifeItem} onPress={() => navigate('AdviceDetail', { adviceType: 'activity' })}><UiIcon name="动" size={20} color="#2196F3" bg="#E3F2FD" /><Text style={styles.lifeText}>活动</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.lifeItem} onPress={() => navigate('AdviceDetail', { adviceType: 'diet' })}><UiIcon name="食" size={20} color="#F44336" bg="#FFEBEE" /><Text style={styles.lifeText}>饮食</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.lifeItem} onPress={() => navigate('WeatherAlerts', { returnTo: 'Home' })}><UiIcon name="预警" size={20} color="#F5A14A" bg="#FFF4E6" /><Text style={styles.lifeText}>Alerts</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.lifeItem} onPress={() => navigate('AdviceDetail', { adviceType: 'travel' })}><UiIcon name="车" size={20} color="#4CAF50" bg="#E8F5E9" /><Text style={styles.lifeText}>Travel</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.lifeItem} onPress={() => navigate('AdviceDetail', { adviceType: 'clothing' })}><UiIcon name="衣" size={20} color="#E91E63" bg="#FCE4EC" /><Text style={styles.lifeText}>Clothing</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.lifeItem} onPress={() => navigate('AdviceDetail', { adviceType: 'activity' })}><UiIcon name="动" size={20} color="#2196F3" bg="#E3F2FD" /><Text style={styles.lifeText}>Activity</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.lifeItem} onPress={() => navigate('AdviceDetail', { adviceType: 'diet' })}><UiIcon name="食" size={20} color="#F44336" bg="#FFEBEE" /><Text style={styles.lifeText}>Food</Text></TouchableOpacity>
         </View>
       </View>
 
       <TouchableOpacity style={styles.solarCard} onPress={() => navigate('SolarTerms')}>
-        <Text style={{color: '#E57373', fontSize: 12, position: 'absolute', top: 15, left: 15}}>传统节气</Text>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#D34C4C', marginVertical: 10 }}>节气文化</Text>
-        <Text style={{color: '#D34C4C', fontSize: 12}}>{term.name} · {term.date}</Text>
+        <Text style={{color: '#E57373', fontSize: 12, position: 'absolute', top: 15, left: 15}}>Solar Terms</Text>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#D34C4C', marginVertical: 10 }}>Seasonal Culture</Text>
+        <Text style={{color: '#D34C4C', fontSize: 12}}>{SOLAR_TERM_LABELS[term.name]} · {term.date}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -470,8 +593,9 @@ function HomeScreen({ navigate, location, weatherData, loading }) {
 // 📱 页面 2：AI 对话
 // ==========================================
 function ChatScreen({ weatherData, location, loading }) {
+  const initialAssistantMessage = 'Hi, I am your smart weather assistant. Ask me for travel, clothing, activity, or food advice.';
   const [messages, setMessages] = useState([
-    { role: 'assistant', text: '你好，我是智能天气助手。可以问我出行、穿衣、活动或饮食建议。' },
+    { role: 'assistant', text: initialAssistantMessage },
   ]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -487,11 +611,19 @@ function ChatScreen({ weatherData, location, loading }) {
       const context = buildWeatherContext(weatherData, location);
       const data = await apiRequest('/api/ai/chat', {
         method: 'POST',
-        body: JSON.stringify({ message: text, ...context }),
+        body: JSON.stringify({
+          city: context.city,
+          messages: [
+            ...messages
+              .filter(message => message.role !== 'assistant' || message.text !== initialAssistantMessage)
+              .map(message => ({ role: message.role, content: message.text })),
+            { role: 'user', content: text },
+          ],
+        }),
       });
       setMessages(prev => [...prev, { role: 'assistant', text: data.reply }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', text: `暂时无法连接 AI 服务：${error.message}` }]);
+      setMessages(prev => [...prev, { role: 'assistant', text: `Unable to connect to the AI service: ${error.message}` }]);
     } finally {
       setSending(false);
     }
@@ -500,7 +632,7 @@ function ChatScreen({ weatherData, location, loading }) {
   return (
     <View style={styles.container}>
       <View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
-        <Text style={{ fontSize: 22, fontWeight: 'bold', color: THEME.textDark, textAlign: 'center', marginBottom: 15 }}>实时天气</Text>
+        <Text style={{ fontSize: 22, fontWeight: 'bold', color: THEME.textDark, textAlign: 'center', marginBottom: 15 }}>Live Weather</Text>
         {!loading && weatherData && (
           <View style={[styles.card, { flexDirection: 'row', alignItems: 'center', padding: 15, marginBottom: 10 }]}>
             <View style={{ flex: 1 }}>
@@ -521,7 +653,7 @@ function ChatScreen({ weatherData, location, loading }) {
       </View>
       
       <View style={styles.chatBox}>
-        <View style={styles.chatHeaderBadge}><Text style={{ color: THEME.textDark, fontWeight: 'bold' }}>智能对话助手</Text></View>
+        <View style={styles.chatHeaderBadge}><Text style={{ color: THEME.textDark, fontWeight: 'bold' }}>Smart Weather Assistant</Text></View>
         <ScrollView style={{ flex: 1, padding: 20 }}>
           {messages.map((message, index) => {
             const isUser = message.role === 'user';
@@ -535,11 +667,11 @@ function ChatScreen({ weatherData, location, loading }) {
               </View>
             );
           })}
-          {sending && <Text style={{ color: THEME.textLight, marginBottom: 10 }}>正在思考...</Text>}
+          {sending && <Text style={{ color: THEME.textLight, marginBottom: 10 }}>Thinking...</Text>}
         </ScrollView>
         <View style={styles.chatInputArea}>
-          <TextInput style={styles.chatInput} placeholder="请输入问题......" value={input} onChangeText={setInput} />
-          <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}><Text style={{color: '#fff', fontWeight: 'bold'}}>发送</Text></TouchableOpacity>
+          <TextInput style={styles.chatInput} placeholder="Ask a weather question..." value={input} onChangeText={setInput} />
+          <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}><Text style={{color: '#fff', fontWeight: 'bold'}}>Send</Text></TouchableOpacity>
         </View>
       </View>
     </View>
@@ -554,41 +686,41 @@ function ProfileScreen({ navigate, setIsLogged, user, setCurrentUser }) {
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
       <View style={[styles.headerRow, {justifyContent: 'center'}]}>
         <TouchableOpacity style={{position: 'absolute', left: 0}}><UiIcon name="设置" size={20} color="#F5A14A" /></TouchableOpacity>
-        <Text style={{fontSize: 18, fontWeight: 'bold'}}>我的</Text>
+        <Text style={{fontSize: 18, fontWeight: 'bold'}}>Me</Text>
       </View>
 
       <View style={[styles.card, { flexDirection: 'row', alignItems: 'center', padding: 25 }]}>
         {user.avatarUrl ? (
           <Image source={{ uri: user.avatarUrl }} style={styles.profileAvatar} />
         ) : (
-          <View style={styles.profileAvatar}><Text style={{ color: '#fff', fontSize: 26, fontWeight: 'bold' }}>{user.nickname?.slice(0, 1) || '晴'}</Text></View>
+          <View style={styles.profileAvatar}><Text style={{ color: '#fff', fontSize: 26, fontWeight: 'bold' }}>{user.nickname?.slice(0, 1) || 'S'}</Text></View>
         )}
         <View style={{ marginLeft: 20, flex: 1 }}>
-          <Text style={{ fontSize: 22, fontWeight: 'bold', color: THEME.textDark }}>{user.nickname || '晴天小暖'}</Text>
+          <Text style={{ fontSize: 22, fontWeight: 'bold', color: THEME.textDark }}>{user.nickname || 'Sunny Nuan'}</Text>
           <Text style={{ color: THEME.textLight, fontSize: 13, marginTop: 6 }}>ID: {user.id || '0000001'}</Text>
         </View>
       </View>
 
-      <Text style={styles.sectionTitleLabel}>我的服务</Text>
+      <Text style={styles.sectionTitleLabel}>My Services</Text>
       <View style={[styles.card, { padding: 20 }]}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => navigate('Collection')}>
             <UiIcon name="心形" size={20} color="#E91E63" bg="#FCE4EC" radius={15} />
-            <Text style={{ fontSize: 12, marginTop: 8, color: THEME.textDark }}>我的收藏</Text>
+            <Text style={{ fontSize: 12, marginTop: 8, color: THEME.textDark }}>Favorites</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => navigate('WeatherAlerts', { returnTo: 'Profile' })}><UiIcon name="通知" size={20} color="#4CAF50" bg="#E8F5E9" radius={15} /><Text style={{ fontSize: 12, marginTop: 8, color: THEME.textDark }}>预警通知</Text></TouchableOpacity>
-          <View style={{ alignItems: 'center' }}><UiIcon name="管理城市" size={20} color="#FF9800" bg="#FFF3E0" radius={15} /><Text style={{ fontSize: 12, marginTop: 8, color: THEME.textDark }}>管理城市</Text></View>
-          <View style={{ alignItems: 'center' }}><UiIcon name="云" size={20} color="#2196F3" bg="#E3F2FD" radius={15} /><Text style={{ fontSize: 12, marginTop: 8, color: THEME.textDark }}>离线数据</Text></View>
+          <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => navigate('WeatherAlerts', { returnTo: 'Profile' })}><UiIcon name="通知" size={20} color="#4CAF50" bg="#E8F5E9" radius={15} /><Text style={{ fontSize: 12, marginTop: 8, color: THEME.textDark }}>Alerts</Text></TouchableOpacity>
+          <View style={{ alignItems: 'center' }}><UiIcon name="管理城市" size={20} color="#FF9800" bg="#FFF3E0" radius={15} /><Text style={{ fontSize: 12, marginTop: 8, color: THEME.textDark }}>Cities</Text></View>
+          <View style={{ alignItems: 'center' }}><UiIcon name="云" size={20} color="#2196F3" bg="#E3F2FD" radius={15} /><Text style={{ fontSize: 12, marginTop: 8, color: THEME.textDark }}>Offline</Text></View>
         </View>
       </View>
 
-      <Text style={styles.sectionTitleLabel}>设置与帮助</Text>
+      <Text style={styles.sectionTitleLabel}>Settings & Help</Text>
       <View style={styles.card}>
         {['账号信息', '主题外观', '隐私安全', '帮助与反馈', '关于应用'].map((item, index) => (
           <TouchableOpacity key={index} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 15, borderBottomWidth: index===4?0:1, borderColor: '#f5f5f5' }} onPress={() => item === '账号信息' && navigate('AccountInfo')}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <UiIcon name={PROFILE_SETTING_ICONS[item]} size={16} color={THEME.textLight} bg="#F9F9F9" />
-              <Text style={{ marginLeft: 10, color: THEME.textDark }}>{item}</Text>
+              <Text style={{ marginLeft: 10, color: THEME.textDark }}>{PROFILE_SETTING_LABELS[item]}</Text>
             </View>
             <UiIcon name="箭头" size={14} color="#ccc" />
           </TouchableOpacity>
@@ -625,10 +757,12 @@ function CitySearchScreen({ navigate }) {
   const fetchAmapSuggestions = async (keyword) => {
     try {
       setErrorMsg('');
+      const cityAlias = getCitySearchAlias(keyword);
+      const searchKeyword = cityAlias?.query || keyword;
       
       // ✨ 核心改进：双管齐下，同时请求 [地理编码(查区划)] 和 [输入提示(查具体地点)] ✨
-      const geoUrl = `https://restapi.amap.com/v3/geocode/geo?address=${encodeURIComponent(keyword)}&key=${API_KEYS.AMAP}`;
-      const tipsUrl = `https://restapi.amap.com/v3/assistant/inputtips?keywords=${encodeURIComponent(keyword)}&key=${API_KEYS.AMAP}`;
+      const geoUrl = `https://restapi.amap.com/v3/geocode/geo?address=${encodeURIComponent(searchKeyword)}&key=${API_KEYS.AMAP}`;
+      const tipsUrl = `https://restapi.amap.com/v3/assistant/inputtips?keywords=${encodeURIComponent(searchKeyword)}&key=${API_KEYS.AMAP}`;
       
       const [geoRes, tipsRes] = await Promise.all([ fetch(geoUrl), fetch(tipsUrl) ]);
       const geoData = await geoRes.json();
@@ -641,8 +775,8 @@ function CitySearchScreen({ navigate }) {
         const exactRegion = geoData.geocodes[0];
         mergedResults.push({
           id: 'geo_' + exactRegion.location,
-          name: keyword, // 用户搜什么，大标题就是什么
-          district: exactRegion.formatted_address, // 显示官方全称，如：福建省漳州市芗城区
+          name: cityAlias?.displayName || keyword, // 用户搜什么，大标题就是什么
+          district: cityAlias?.district || exactRegion.formatted_address, // 显示官方全称，如：福建省漳州市芗城区
           location: exactRegion.location,
           isAdmin: true // 标记为行政区划，用于前端高亮
         });
@@ -669,10 +803,10 @@ function CitySearchScreen({ navigate }) {
       }
 
       setSuggestions(mergedResults);
-      if(mergedResults.length === 0) setErrorMsg('未找到包含该关键字的地点');
+      if(mergedResults.length === 0) setErrorMsg('No matching places found');
 
     } catch { 
-      setErrorMsg('网络请求失败'); 
+      setErrorMsg('Network request failed'); 
     }
   };
 
@@ -690,7 +824,7 @@ function CitySearchScreen({ navigate }) {
         </TouchableOpacity>
         <TextInput 
           style={styles.searchInput} 
-          placeholder="请输入中文地点，例如：北京" 
+          placeholder="Search city, e.g. Beijing" 
           value={query} onChangeText={setQuery} autoFocus 
         />
       </View>
@@ -738,7 +872,7 @@ function SolarTermsScreen({ navigate }) {
       <TouchableOpacity key={name} style={[styles.termItem, { backgroundColor }]} onPress={() => navigate('SolarTermDetail', { termName: name })} activeOpacity={0.82}>
         {image && <Image source={image} style={styles.termImage} resizeMode="cover" />}
         <View style={styles.termOverlay} />
-        <Text style={styles.termText}>{name}</Text>
+        <Text style={styles.termText}>{SOLAR_TERM_LABELS[name]}</Text>
       </TouchableOpacity>
     );
   };
@@ -747,35 +881,35 @@ function SolarTermsScreen({ navigate }) {
     <View style={styles.container}>
       <View style={styles.subHeader}>
         <TouchableOpacity onPress={() => navigate('Home')} style={{padding:10}}><UiIcon name="返回" size={24} /></TouchableOpacity>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#E57373' }}>传统节气</Text>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#E57373' }}>Solar Terms</Text>
         <View style={{width: 44}}/>
       </View>
       <ScrollView contentContainerStyle={{padding: 20}}>
         
         <View style={[styles.card, {alignItems: 'center', paddingVertical: 40, borderColor: THEME.primary, borderWidth: 1}]}>
            <Text style={{ color: isToday ? '#4CAF50' : THEME.textLight, fontSize: 16, marginBottom: 10, fontWeight: 'bold' }}>
-            {isToday ? '✨ 今日节气 ✨' : '即将到来的节气'}
+            {isToday ? 'Today\'s Solar Term' : 'Upcoming Solar Term'}
           </Text>
-          <Text style={{ fontSize: 40, fontWeight: 'bold', color: '#D34C4C' }}>{upcomingTerm.name}</Text>
-          <Text style={{ color: THEME.textDark, marginTop: 10, fontSize: 16 }}>预测公历日期：{upcomingTerm.date}</Text>
+          <Text style={{ fontSize: 40, fontWeight: 'bold', color: '#D34C4C', textAlign: 'center' }}>{SOLAR_TERM_LABELS[upcomingTerm.name]}</Text>
+          <Text style={{ color: THEME.textDark, marginTop: 10, fontSize: 16 }}>Estimated date: {upcomingTerm.date}</Text>
         </View>
 
-        <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10, color: '#E91E63' }}>春</Text>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10, color: '#E91E63' }}>Spring</Text>
         <View style={styles.termGrid}>
           {['立春', '雨水', '惊蛰', '春分', '清明', '谷雨'].map((t) => renderTermItem(t, '#FCE4EC'))}
         </View>
         
-        <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10, color: '#4CAF50' }}>夏</Text>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10, color: '#4CAF50' }}>Summer</Text>
         <View style={styles.termGrid}>
           {['立夏', '小满', '芒种', '夏至', '小暑', '大暑'].map((t) => renderTermItem(t, '#E8F5E9'))}
         </View>
 
-        <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10, color: '#FF9800' }}>秋</Text>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10, color: '#FF9800' }}>Autumn</Text>
         <View style={styles.termGrid}>
           {['立秋', '处暑', '白露', '秋分', '寒露', '霜降'].map((t) => renderTermItem(t, '#FFF3E0'))}
         </View>
 
-        <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10, color: '#2196F3' }}>冬</Text>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10, color: '#2196F3' }}>Winter</Text>
         <View style={styles.termGrid}>
           {['立冬', '小雪', '大雪', '冬至', '小寒', '大寒'].map((t) => renderTermItem(t, '#E3F2FD'))}
         </View>
@@ -790,23 +924,29 @@ function SolarTermsScreen({ navigate }) {
 // ==========================================
 function SolarTermDetailScreen({ navigate, termName }) {
   const detail = SOLAR_TERM_DETAILS[termName] || SOLAR_TERM_DETAILS['立春'];
-  const termMeta = SOLAR_TERMS.find(item => item.name === detail.name);
-  const image = SOLAR_TERM_IMAGES[detail.name];
+  const termMeta = SOLAR_TERMS.find(item => item.name === termName);
+  const image = SOLAR_TERM_IMAGES[termName];
+  const solarNameParts = String(detail.name || '').match(/^(.*?)(?:\((.*)\))?$/);
+  const displayName = solarNameParts?.[1]?.trim() || detail.name;
+  const pinyinName = solarNameParts?.[2]?.trim() || '';
   const sections = [
-    { title: '简介', content: detail.intro },
-    { title: '代表寓意', content: detail.meaning },
-    { title: '气候特点', content: detail.climate },
-    { title: '来历', content: detail.origin },
-    { title: '饮食', content: detail.food },
-    { title: '习俗', content: detail.customs },
-    { title: '养生', content: detail.health },
+    { title: 'Overview', content: detail.intro },
+    { title: 'Symbolic Meaning', content: detail.meaning },
+    { title: 'Climate', content: detail.climate },
+    { title: 'Origin', content: detail.origin },
+    { title: 'Food', content: detail.food },
+    { title: 'Customs', content: detail.customs },
+    { title: 'Wellness', content: detail.health },
   ];
 
   return (
     <View style={styles.container}>
       <View style={styles.subHeader}>
         <TouchableOpacity onPress={() => navigate('SolarTerms')} style={{padding:10}}><UiIcon name="返回" size={24} /></TouchableOpacity>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#E57373' }}>{detail.name}</Text>
+        <View style={{ alignItems: 'center', flex: 1 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#E57373', textAlign: 'center' }}>{displayName}</Text>
+          {!!pinyinName && <Text style={{ fontSize: 12, color: '#B76A6A', marginTop: 2 }}>{pinyinName}</Text>}
+        </View>
         <View style={{width: 44}}/>
       </View>
 
@@ -814,12 +954,13 @@ function SolarTermDetailScreen({ navigate, termName }) {
         <View style={styles.detailHero}>
           {image && <Image source={image} style={styles.detailHeroImage} resizeMode="cover" />}
           <View style={styles.detailHeroOverlay} />
-          <Text style={styles.detailHeroTitle}>{detail.name}</Text>
+          <Text style={styles.detailHeroTitle}>{displayName}</Text>
+          {!!pinyinName && <Text style={styles.detailHeroPinyin}>{pinyinName}</Text>}
           <Text style={styles.detailHeroDate}>{termMeta?.date || ''}</Text>
         </View>
 
         <View style={styles.detailSummaryCard}>
-          <Text style={styles.detailSummaryLabel}>节气关键词</Text>
+          <Text style={styles.detailSummaryLabel}>Keywords</Text>
           <Text style={styles.detailSummaryText}>{detail.meaning}</Text>
         </View>
 
@@ -857,7 +998,7 @@ function CollectionScreen({ navigate }) {
         <Text style={{ fontSize: 24, padding: 10 }}>...</Text>
       </View>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
-        {favorites.length === 0 && <Text style={{textAlign: 'center', color: '#999', marginTop: 50}}>暂无收藏</Text>}
+        {favorites.length === 0 && <Text style={{textAlign: 'center', color: '#999', marginTop: 50}}>No favorites yet</Text>}
         {favorites.map((city, i) => (
           <TouchableOpacity key={i} style={styles.collectionCard} onPress={() => navigate('Home', { newLocation: city })}><Text style={{ fontSize: 18, fontWeight: 'bold' }}>{city.name}</Text></TouchableOpacity>
         ))}
@@ -870,12 +1011,12 @@ function CollectionScreen({ navigate }) {
 // 📱 页面 8：账号信息
 // ==========================================
 function AccountInfoScreen({ navigate, user, setCurrentUser }) {
-  const [nickname, setNickname] = useState(user.nickname || '晴天小暖');
+  const [nickname, setNickname] = useState(user.nickname || 'Sunny Nuan');
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    setNickname(user.nickname || '晴天小暖');
+    setNickname(user.nickname || 'Sunny Nuan');
     setAvatarUrl(user.avatarUrl || '');
   }, [user]);
 
@@ -888,10 +1029,10 @@ function AccountInfoScreen({ navigate, user, setCurrentUser }) {
       });
       setCurrentUser(data.user);
       await AsyncStorage.setItem('currentUser', JSON.stringify(data.user));
-      Alert.alert('已保存', '账号信息已更新');
+      Alert.alert('Saved', 'Account information updated');
       navigate('Profile');
     } catch (error) {
-      Alert.alert('保存失败', error.message);
+      Alert.alert('Save failed', error.message);
     } finally {
       setSaving(false);
     }
@@ -901,31 +1042,31 @@ function AccountInfoScreen({ navigate, user, setCurrentUser }) {
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
       <View style={[styles.headerRow, {justifyContent: 'center'}]}>
         <TouchableOpacity onPress={() => navigate('Profile')} style={{position: 'absolute', left: 0}}><UiIcon name="返回" size={24} /></TouchableOpacity>
-        <Text style={{fontSize: 18, fontWeight: 'bold'}}>账号信息</Text>
+        <Text style={{fontSize: 18, fontWeight: 'bold'}}>Account Info</Text>
       </View>
 
       <View style={[styles.card, { alignItems: 'center' }]}>
         {avatarUrl ? (
           <Image source={{ uri: avatarUrl }} style={styles.accountAvatar} />
         ) : (
-          <View style={styles.accountAvatar}><Text style={{ color: '#fff', fontSize: 36, fontWeight: 'bold' }}>{nickname.slice(0, 1) || '晴'}</Text></View>
+          <View style={styles.accountAvatar}><Text style={{ color: '#fff', fontSize: 36, fontWeight: 'bold' }}>{nickname.slice(0, 1) || 'S'}</Text></View>
         )}
         <Text style={{ color: THEME.textLight, marginTop: 10 }}>ID: {user.id || '0000001'}</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.inputLabel}>昵称</Text>
-        <TextInput style={styles.profileInput} value={nickname} onChangeText={setNickname} placeholder="请输入昵称" />
+        <Text style={styles.inputLabel}>Nickname</Text>
+        <TextInput style={styles.profileInput} value={nickname} onChangeText={setNickname} placeholder="Enter nickname" />
 
-        <Text style={styles.inputLabel}>头像 URL</Text>
+        <Text style={styles.inputLabel}>Avatar URL</Text>
         <TextInput style={styles.profileInput} value={avatarUrl} onChangeText={setAvatarUrl} placeholder="https://example.com/avatar.png" autoCapitalize="none" />
 
-        <Text style={styles.inputLabel}>邮箱</Text>
-        <Text style={styles.readonlyValue}>{user.email || '未绑定'}</Text>
+        <Text style={styles.inputLabel}>Email</Text>
+        <Text style={styles.readonlyValue}>{user.email || 'Not linked'}</Text>
       </View>
 
       <TouchableOpacity style={styles.profileSaveBtn} onPress={saveProfile} disabled={saving}>
-        <Text style={{ color: '#fff', fontWeight: 'bold' }}>{saving ? '保存中...' : '保存'}</Text>
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>{saving ? 'Saving...' : 'Save'}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -938,24 +1079,30 @@ function WeatherAlertsScreen({ navigate, location, returnTo }) {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState('');
+  const [serviceUnavailable, setServiceUnavailable] = useState(false);
 
   useEffect(() => {
     const fetchAlerts = async () => {
       setLoading(true);
+      setNotice('');
+      setServiceUnavailable(false);
       try {
         const saved = await AsyncStorage.getItem('favorites');
         const favList = saved ? JSON.parse(saved) : [];
         const locations = [location, ...favList].filter(Boolean);
         const results = await Promise.all(locations.map(async (item) => {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 5000);
           try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 8000);
             const data = await apiRequest(`/api/weather/alerts?lat=${encodeURIComponent(item.lat)}&lon=${encodeURIComponent(item.lon)}`, { signal: controller.signal });
-            clearTimeout(timeout);
             if (data.warning) setNotice(data.warning);
+            if (data.unavailable) setServiceUnavailable(true);
             return (data.alerts || []).map(alert => ({ ...alert, cityName: item.name }));
           } catch {
+            setServiceUnavailable(true);
             return [];
+          } finally {
+            clearTimeout(timeout);
           }
         }));
         setAlerts(results.flat());
@@ -970,7 +1117,7 @@ function WeatherAlertsScreen({ navigate, location, returnTo }) {
     <View style={styles.container}>
       <View style={styles.subHeader}>
         <TouchableOpacity onPress={() => navigate(returnTo || 'Home')} style={{padding:10}}><UiIcon name="返回" size={24} /></TouchableOpacity>
-        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>预警通知</Text>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Weather Alerts</Text>
         <View style={{width: 44}}/>
       </View>
 
@@ -979,8 +1126,8 @@ function WeatherAlertsScreen({ navigate, location, returnTo }) {
         {!loading && alerts.length === 0 && (
           <View style={[styles.card, { alignItems: 'center', paddingVertical: 40 }]}>
             <UiIcon name="通知" size={28} color="#4CAF50" bg="#E8F5E9" radius={20} />
-            <Text style={{ marginTop: 12, color: THEME.textDark, fontWeight: 'bold' }}>暂无天气预警</Text>
-            <Text style={{ marginTop: 6, color: THEME.textLight, textAlign: 'center' }}>{notice || '当前地点和收藏地点暂未获取到政府预警信息'}</Text>
+            <Text style={{ marginTop: 12, color: THEME.textDark, fontWeight: 'bold' }}>{serviceUnavailable ? 'Alerts Unavailable' : 'No Weather Alerts'}</Text>
+            <Text style={{ marginTop: 6, color: THEME.textLight, textAlign: 'center' }}>{notice || (serviceUnavailable ? 'The alert request failed or timed out. Please try again later.' : 'No official alerts found for the current and favorite locations.')}</Text>
           </View>
         )}
         {!loading && alerts.map((alert, index) => (
@@ -1001,8 +1148,9 @@ function WeatherAlertsScreen({ navigate, location, returnTo }) {
 // ==========================================
 function AdviceDetailScreen({ navigate, type, weatherData, location }) {
   const [reply, setReply] = useState('');
+  const [rawAdvice, setRawAdvice] = useState(null);
   const [loading, setLoading] = useState(true);
-  const title = ADVICE_TYPES[type] || 'AI 建议';
+  const title = ADVICE_TYPES[type] || 'AI Advice';
 
   useEffect(() => {
     const fetchAdvice = async () => {
@@ -1011,11 +1159,13 @@ function AdviceDetailScreen({ navigate, type, weatherData, location }) {
         const context = buildWeatherContext(weatherData, location);
         const data = await apiRequest('/api/ai/advice', {
           method: 'POST',
-          body: JSON.stringify({ type, ...context }),
+          body: JSON.stringify({ type, city: context.city, weather: context.weather }),
         });
         setReply(data.reply);
+        setRawAdvice(data.raw || null);
       } catch (error) {
-        setReply(`暂时无法连接 AI 服务：${error.message}`);
+        setReply(`Unable to connect to the AI service: ${error.message}`);
+        setRawAdvice(null);
       } finally {
         setLoading(false);
       }
@@ -1034,14 +1184,42 @@ function AdviceDetailScreen({ navigate, type, weatherData, location }) {
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <View style={styles.adviceHero}>
           <Text style={styles.adviceTitle}>{title}</Text>
-          <Text style={styles.adviceSubtitle}>{location?.name || '当前城市'} · 基于实时天气生成</Text>
+          <Text style={styles.adviceSubtitle}>{location?.name || 'Current City'} · Generated from live weather</Text>
         </View>
 
         <View style={styles.card}>
           {loading ? (
             <ActivityIndicator size="large" color={THEME.primary} />
           ) : (
-            <Text style={styles.adviceText}>{reply}</Text>
+            <>
+              <Text style={styles.adviceText}>{reply}</Text>
+              {rawAdvice && (
+                <View style={styles.aiJsonBox}>
+                  <Text style={styles.aiJsonTitle}>AI Response Data</Text>
+                  {type === 'clothing' && (
+                    <>
+                      <Text style={styles.aiJsonLine}>Feels like: {rawAdvice.feelsLike ?? '--'}°</Text>
+                      <Text style={styles.aiJsonLine}>Humidity: {rawAdvice.humidity ?? '--'}%</Text>
+                      {(rawAdvice.clothingDetails || []).map((item, index) => <Text key={index} style={styles.aiJsonLine}>- {item}</Text>)}
+                    </>
+                  )}
+                  {type === 'travel' && (
+                    <>
+                      <Text style={styles.aiJsonLine}>UV: {rawAdvice.uv ? `${rawAdvice.uv.value} (${rawAdvice.uv.level})` : '--'}</Text>
+                      <Text style={styles.aiJsonLine}>Air Quality: {rawAdvice.airQuality ? `${rawAdvice.airQuality.level} AQI ${rawAdvice.airQuality.aqi}` : '--'}</Text>
+                      {(rawAdvice.outingWarnings || []).map((item, index) => <Text key={index} style={styles.aiJsonLine}>- {item}</Text>)}
+                    </>
+                  )}
+                  {type === 'activity' && (rawAdvice.activityAdvice || []).map((item, index) => <Text key={index} style={styles.aiJsonLine}>- {item}</Text>)}
+                  {type === 'diet' && (
+                    <>
+                      {(rawAdvice.foodAdvice || []).map((item, index) => <Text key={`food-${index}`} style={styles.aiJsonLine}>- {item}</Text>)}
+                      {(rawAdvice.foodDetails || []).map((item, index) => <Text key={`detail-${index}`} style={styles.aiJsonLine}>Note: {item}</Text>)}
+                    </>
+                  )}
+                </View>
+              )}
+            </>
           )}
         </View>
       </ScrollView>
@@ -1062,11 +1240,11 @@ function AuthScreen({ navigate, setIsLogged, setCurrentUser }) {
   
   const handleAuthAction = async () => {
     if (!email || !password) {
-      Alert.alert('提示', '请输入邮箱和密码');
+      Alert.alert('Notice', 'Please enter email and password');
       return;
     }
     if (!isLoginMode && password !== confirmPassword) {
-      Alert.alert('提示', '两次输入的密码不一致');
+      Alert.alert('Notice', 'Passwords do not match');
       return;
     }
 
@@ -1077,7 +1255,7 @@ function AuthScreen({ navigate, setIsLogged, setCurrentUser }) {
         body: JSON.stringify({
           email,
           password,
-          nickname: nickname || '晴天小暖',
+          nickname: nickname || 'Sunny Nuan',
         }),
       });
       await AsyncStorage.setItem('authToken', data.token);
@@ -1086,7 +1264,7 @@ function AuthScreen({ navigate, setIsLogged, setCurrentUser }) {
       setIsLogged(true);
       navigate('Profile');
     } catch (error) {
-      Alert.alert(isLoginMode ? '登录失败' : '注册失败', error.message);
+      Alert.alert(isLoginMode ? 'Login failed' : 'Sign up failed', error.message);
     } finally {
       setSubmitting(false);
     }
@@ -1103,7 +1281,7 @@ function AuthScreen({ navigate, setIsLogged, setCurrentUser }) {
         
         <TextInput style={styles.authInput} placeholder="Email address" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
         
-        {!isLoginMode && <TextInput style={styles.authInput} placeholder="昵称（默认：晴天小暖）" value={nickname} onChangeText={setNickname} />}
+        {!isLoginMode && <TextInput style={styles.authInput} placeholder="Nickname (default: Sunny Nuan)" value={nickname} onChangeText={setNickname} />}
         
         <TextInput style={styles.authInput} placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
         
@@ -1154,6 +1332,8 @@ const styles = StyleSheet.create({
   alertSender: { color: THEME.textLight, marginBottom: 10 },
   alertDescription: { color: THEME.textDark, lineHeight: 22 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  sourceNotice: { backgroundColor: '#FFF8E8', borderWidth: 1, borderColor: '#FFE4C4', borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 12 },
+  sourceNoticeText: { color: THEME.primary, fontSize: 12, fontWeight: 'bold', textAlign: 'center' },
   iconBtn: { width: 44, height: 44, backgroundColor: '#fff', borderRadius: 22, justifyContent: 'center', alignItems: 'center', elevation: 2 },
   cityText: { fontSize: 16, fontWeight: 'bold', color: THEME.primary, marginLeft: 5 },
   mainWeatherTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -1190,6 +1370,9 @@ const styles = StyleSheet.create({
   adviceTitle: { color: THEME.textDark, fontSize: 26, fontWeight: 'bold', marginBottom: 8 },
   adviceSubtitle: { color: THEME.primary, fontWeight: 'bold' },
   adviceText: { color: THEME.textDark, fontSize: 16, lineHeight: 26 },
+  aiJsonBox: { backgroundColor: '#FFF8E8', borderRadius: 16, padding: 14, marginTop: 16, borderWidth: 1, borderColor: '#FFE4C4' },
+  aiJsonTitle: { color: THEME.primary, fontWeight: 'bold', marginBottom: 8 },
+  aiJsonLine: { color: THEME.textDark, lineHeight: 22 },
   subHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 15, backgroundColor: THEME.bg },
   searchInput: { flex: 1, backgroundColor: '#fff', height: 44, borderRadius: 22, paddingHorizontal: 20, elevation: 1 },
   suggestItem: { padding: 15, borderBottomWidth: 1, borderBottomColor: '#eee', backgroundColor: '#fff' },
@@ -1201,12 +1384,13 @@ const styles = StyleSheet.create({
   termItem: { width: '30%', height: 100, borderRadius: 30, justifyContent: 'center', alignItems: 'center', marginBottom: 15, overflow: 'hidden' },
   termImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   termOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.18)' },
-  termText: { fontSize: 20, fontWeight: 'bold', color: '#111', textShadowColor: 'rgba(255,255,255,0.9)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
+  termText: { fontSize: 13, fontWeight: 'bold', color: '#111', textAlign: 'center', paddingHorizontal: 6, textShadowColor: 'rgba(255,255,255,0.9)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
   detailScroll: { padding: 20, paddingBottom: 40 },
   detailHero: { height: 190, borderRadius: 28, overflow: 'hidden', justifyContent: 'flex-end', padding: 24, marginBottom: 16, backgroundColor: '#FDECE6' },
   detailHeroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   detailHeroOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,248,239,0.36)' },
   detailHeroTitle: { fontSize: 42, fontWeight: 'bold', color: '#1F1B2D', textShadowColor: 'rgba(255,255,255,0.9)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
+  detailHeroPinyin: { marginTop: 4, fontSize: 17, fontWeight: '600', color: '#7A4B4B', textShadowColor: 'rgba(255,255,255,0.85)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
   detailHeroDate: { marginTop: 6, fontSize: 16, fontWeight: 'bold', color: '#D34C4C' },
   detailSummaryCard: { backgroundColor: '#FFF8E8', borderRadius: 20, padding: 18, marginBottom: 14, borderWidth: 1, borderColor: '#FFE4C4' },
   detailSummaryLabel: { color: THEME.primary, fontSize: 13, fontWeight: 'bold', marginBottom: 6 },
