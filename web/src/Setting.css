@@ -1,4 +1,4 @@
-/* 外层容器完全照搬 Dashboard 结构 */
+/* 外层容器 */
 .app-container {
   display: flex;
   min-height: 100vh;
@@ -6,7 +6,7 @@
   overflow: hidden;
 }
 
-/* 核心边距，和 Dashboard 完全一致 */
+/* 主内容区 */
 .main-content {
   flex: 1;
   margin-left: 302px;
@@ -14,6 +14,7 @@
   height: 100vh;
   box-sizing: border-box;
   overflow-y: auto;
+  position: relative;
 }
 
 .setting-page {
@@ -49,12 +50,18 @@
   gap: 16px;
   align-items: flex-start;
   margin-bottom: 20px;
+  padding: 22px 24px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), #fff6e9);
+  box-shadow: 0 16px 40px rgba(108, 80, 35, 0.08);
+  border: 1px solid rgba(224, 206, 176, 0.45);
 }
 .user-avatar {
   width: 64px;
   height: 64px;
   border-radius: 50%;
   object-fit: cover;
+  border: 1px solid rgba(214, 186, 142, 0.45);
 }
 .user-name-row {
   display: flex;
@@ -95,7 +102,7 @@
 }
 .progress-text {
   position: absolute;
-  right: -30px;
+  right: -34px;
   top: -6px;
   font-size: 12px;
   color: #997A5F;
@@ -106,13 +113,14 @@
   margin: 0;
 }
 
-/* 左右双栏布局 */
+/* 双栏布局 */
 .two-column-container {
   display: flex;
   gap: 40px;
   margin-bottom: 20px;
 }
-.left-column, .right-column {
+.left-column,
+.right-column {
   flex: 1;
 }
 
@@ -124,30 +132,37 @@
   margin: 0 0 12px;
 }
 
-/* ========== 核心修改：统一卡片大小 + 左上对齐 + 浅棕色文字 ========== */
-/* 左栏 Living Index 3列网格 */
+/* 建议卡片网格 */
 .index-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
+
 .index-item {
   background: #fff;
   padding: 16px;
-  border-radius: 12px;
-  /* 固定统一高度，所有块大小完全一致 */
+  border-radius: 16px;
   height: 120px;
   display: flex;
   flex-direction: column;
-  /* 图标+文字 左上对齐 */
   align-items: flex-start;
   justify-content: flex-start;
   gap: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   border: 1px solid #F0E6D2;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.index-item.clickable {
+  cursor: pointer;
+}
+.index-item.clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.10);
+  border-color: #E8D4B9;
 }
 
-/* 右栏 My Service 2列网格 */
+/* 服务卡片 */
 .service-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -156,30 +171,30 @@
 .service-item {
   background: #fff;
   padding: 16px;
-  border-radius: 12px;
-  /* 和左边卡片完全一样高 */
+  border-radius: 16px;
   height: 120px;
   display: flex;
   flex-direction: column;
-  /* 左上对齐 */
   align-items: flex-start;
   justify-content: flex-start;
   gap: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   border: 1px solid #F0E6D2;
 }
 
-/* 上方按钮 emoji 样式保持不变 */
+/* 图标与文字 */
 .item-icon {
   font-size: 32px;
   line-height: 1;
 }
-
-/* 按钮内文字：浅棕色，和参考图一致 */
 .index-item span:last-child,
 .service-item span:last-child {
   color: #997A5F;
   font-size: 14px;
+}
+.index-item span:first-child,
+.service-item span:first-child {
+  color: #BC9A5B;
 }
 
 /* 设置列表 */
@@ -199,18 +214,106 @@
 .setting-row:last-child {
   border-bottom: none;
 }
-
-/* 仅此处修改为 SVG 图标样式，适配你下面5个图标 */
 .row-icon {
   width: 20px;
   height: 20px;
   object-fit: contain;
 }
-
 .setting-row span:nth-child(2) {
   color: #997A5F;
 }
 .arrow {
   margin-left: auto;
   color: #D4B078;
+}
+
+/* 弹窗 */
+.advice-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 1400;
+}
+.advice-modal {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.16);
+}
+.advice-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: linear-gradient(90deg, #fff8ef, #f7e7d0);
+  border-bottom: 1px solid #f0e0cd;
+}
+.advice-modal-emoji {
+  font-size: 26px;
+  margin-right: 10px;
+}
+.advice-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #4a3b2d;
+}
+.advice-modal-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+.advice-modal-body {
+  padding: 20px;
+}
+.advice-modal-label {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f4e2c3;
+  color: #8c6a42;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+.advice-modal-body p {
+  margin: 0;
+  color: #5c4b3a;
+  line-height: 1.75;
+  font-size: 14px;
+}
+
+/* 响应式 */
+@media (max-width: 1080px) {
+  .index-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 780px) {
+  .two-column-container {
+    flex-direction: column;
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 24px 20px;
+  }
+}
+@media (max-width: 560px) {
+  .index-grid,
+  .service-grid {
+    grid-template-columns: 1fr;
+  }
+  .user-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

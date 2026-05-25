@@ -22,7 +22,7 @@ const menuItems = [
   },
   {
     path: '/calendar',
-    label: 'Calendar',
+    label: 'Solar Terms',
     icon: `${iconBase}/%E6%97%A5%E5%8E%86%201.svg`,
   },
   {
