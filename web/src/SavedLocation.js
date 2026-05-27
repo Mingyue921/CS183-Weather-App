@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { API_BASE_URL, apiRequest } from './api';
 import './SavedLocation.css';
 
 const iconBase = '/img/105';
-const apiBase = process.env.REACT_APP_API_BASE_URL || '';
 const amapKey = process.env.REACT_APP_WEATHER_KEY;
 
 function SavedLocation() {
@@ -11,11 +11,6 @@ function SavedLocation() {
   const [weatherCards, setWeatherCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-
-  const authHeaders = useMemo(() => {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  }, []);
 
   useEffect(() => {
     loadFavorites();
@@ -51,17 +46,12 @@ function SavedLocation() {
     const localFavorites = readLocalFavorites();
 
     try {
-      if (!authHeaders.Authorization) {
+      if (!localStorage.getItem('token')) {
         setFavorites(localFavorites);
         return;
       }
 
-      const response = await fetch(`${apiBase}/api/favorites`, {
-        headers: authHeaders,
-      });
-
-      if (!response.ok) throw new Error('Failed to load favorites');
-      const data = await response.json();
+      const data = await apiRequest('/api/favorites');
       setFavorites(normalizeFavorites(data.favorites));
     } catch {
       setFavorites(localFavorites);
@@ -84,14 +74,10 @@ function SavedLocation() {
     setFavorites(nextFavorites);
     setQuery('');
 
-    if (authHeaders.Authorization) {
+    if (localStorage.getItem('token')) {
       try {
-        await fetch(`${apiBase}/api/favorites`, {
+        await apiRequest('/api/favorites', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...authHeaders,
-          },
           body: JSON.stringify({ city: card.city }),
         });
       } catch {
@@ -103,11 +89,10 @@ function SavedLocation() {
   const removeFavorite = async (city) => {
     setFavorites((current) => current.filter((item) => item !== city));
 
-    if (authHeaders.Authorization) {
+    if (localStorage.getItem('token')) {
       try {
-        await fetch(`${apiBase}/api/favorites/${encodeURIComponent(city)}`, {
+        await apiRequest(`/api/favorites/${encodeURIComponent(city)}`, {
           method: 'DELETE',
-          headers: authHeaders,
         });
       } catch {
         setMessage('Removed locally. Server sync is temporarily unavailable.');
@@ -197,7 +182,7 @@ async function fetchCityWeather(city) {
 async function fetchBackendWeather(city) {
   try {
     const response = await fetch(
-      `${apiBase}/api/weather/current?city=${encodeURIComponent(city)}`
+      `${API_BASE_URL}/api/weather/current?city=${encodeURIComponent(city)}`
     );
     if (!response.ok) return null;
     const data = await response.json();

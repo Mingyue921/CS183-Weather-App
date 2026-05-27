@@ -124,6 +124,12 @@ body {
     margin-bottom: 0;
 }
 
+.term-card-pinyin {
+    font-size: 0.82rem;
+    color: rgba(90, 73, 44, 0.65);
+    font-weight: 600;
+}
+
 .term-card-date {
     font-size: 0.80rem;
     color: rgba(60, 56, 44, 0.72);

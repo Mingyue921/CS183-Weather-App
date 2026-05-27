@@ -47,8 +47,8 @@
 /* 用户卡片 */
 .user-card {
   display: flex;
-  gap: 16px;
-  align-items: flex-start;
+  gap: 22px;
+  align-items: center;
   margin-bottom: 20px;
   padding: 22px 24px;
   border-radius: 22px;
@@ -69,46 +69,18 @@
   gap: 12px;
 }
 .user-name {
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 32px;
+  font-weight: 700;
   margin: 0;
   color: #554433;
 }
-.vip-tag {
-  background: #f7d89c;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #996600;
-}
 .user-id {
-  font-size: 14px;
+  font-size: 18px;
   color: #997A5F;
   margin: 6px 0;
 }
-.progress-bar {
-  width: 180px;
-  height: 8px;
-  background: #eee;
-  border-radius: 4px;
-  position: relative;
-  margin: 8px 0;
-}
-.progress-fill {
-  width: 63%;
-  height: 100%;
-  background: #D4B078;
-  border-radius: 4px;
-}
-.progress-text {
-  position: absolute;
-  right: -34px;
-  top: -6px;
-  font-size: 12px;
-  color: #997A5F;
-}
-.expire-text {
-  font-size: 13px;
+.user-email {
+  font-size: 14px;
   color: #997A5F;
   margin: 0;
 }
@@ -191,6 +163,11 @@
 .service-item span:last-child {
   color: #997A5F;
   font-size: 14px;
+}
+.index-item small {
+  color: #b09172;
+  font-size: 12px;
+  line-height: 1.35;
 }
 .index-item span:first-child,
 .service-item span:first-child {

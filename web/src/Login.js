@@ -1,31 +1,94 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { apiRequest } from './api';
 import './Login.css';
 
 export default function Login({ setIsLogin }) {
-  const handleLogin = () => {
-    setIsLogin(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!email.trim() || !password) {
+      alert('Please enter email and password.');
+      return;
+    }
+
+    if (isRegisterMode && password.length < 6) {
+      alert('Password must be at least 6 characters.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const data = await apiRequest(`/api/auth/${isRegisterMode ? 'register' : 'login'}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          nickname: nickname.trim() || undefined,
+        }),
+      });
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      setIsLogin(true);
+    } catch (err) {
+      alert(err.message || 'Authentication failed.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="login-page">
-      {/* 底层：rains 背景图（和你img标签写法完全一致） */}
-      < img src="/img/105/rains.svg" alt="rains-bg" className="bg-rains" />
+      <img src="/img/105/rains.svg" alt="rains-bg" className="bg-rains" />
+      <img src="/img/105/sun.svg" alt="sun-cloud" className="bg-sun" />
 
-      {/* 上层：太阳云图 */}
-      < img src="/img/105/sun.svg" alt="sun-cloud" className="bg-sun" />
-
-      {/* 登录卡片 */}
       <div className="login-card">
-        <h1 className="login-title">Log In</h1>
-        <input className="input-field" placeholder="Email Adress" />
+        <h1 className="login-title">{isRegisterMode ? 'Sign Up' : 'Log In'}</h1>
+
+        <input
+          className="input-field"
+          placeholder="Email Address"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
+
+        {isRegisterMode && (
+          <input
+            className="input-field"
+            placeholder="Nickname"
+            value={nickname}
+            onChange={(event) => setNickname(event.target.value)}
+          />
+        )}
+
         <div className="password-wrap">
-          <input type="password" className="input-field" placeholder="Password" />
-          <span className="eye">👁</span>
+          <input
+            type="password"
+            className="input-field"
+            placeholder="Password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') handleSubmit();
+            }}
+          />
+          <span className="eye">Show</span>
         </div>
+
         <div className="forgot">Forget Password?</div>
-        <button className="login-btn" onClick={handleLogin}>Log In</button>
+        <button className="login-btn" onClick={handleSubmit} disabled={submitting}>
+          {submitting ? 'Submitting...' : isRegisterMode ? 'Sign Up' : 'Log In'}
+        </button>
+
         <div className="signup">
-          Don't have an account? <span>Sign Up</span>
+          {isRegisterMode ? 'Already have an account?' : "Don't have an account?"}{' '}
+          <span onClick={() => setIsRegisterMode((current) => !current)}>
+            {isRegisterMode ? 'Log In' : 'Sign Up'}
+          </span>
         </div>
       </div>
     </div>

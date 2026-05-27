@@ -32,7 +32,7 @@ const menuItems = [
   },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,7 +56,7 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      <div className="sidebar-logout">
+      <div className="sidebar-logout" onClick={onLogout}>
         <img src={`${iconBase}/%E9%80%80%E5%87%BA%E7%99%BB%E5%BD%95%20(2)%201.svg`} alt="" />
         <span>Log Out</span>
       </div>

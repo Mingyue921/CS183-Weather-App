@@ -181,6 +181,18 @@
   align-items: center;
 }
 
+.ai-reply-box {
+  margin: 14px 0 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fbfbff;
+  color: #31385a;
+  font-size: 15px;
+  line-height: 1.45;
+  box-shadow: inset 0 0 0 1px rgba(93, 109, 184, 0.12);
+  white-space: pre-wrap;
+}
+
 .ai-link-button {
   width: 30px;
   height: 30px;
@@ -216,6 +228,11 @@
   border-radius: 9px;
   background: #d09d53;
   box-shadow: 0 6px 12px rgba(208, 157, 83, 0.26);
+}
+
+.ai-send-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
 }
 
 .ai-send-button img {

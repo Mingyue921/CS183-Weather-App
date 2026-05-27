@@ -4,576 +4,81 @@ import './Calendar.css';
 const publicPath = process.env.PUBLIC_URL || '';
 
 const seasonClassMap = {
-  春季: 'spring',
-  夏季: 'summer',
-  秋季: 'autumn',
-  冬季: 'winter',
+  Spring: 'spring',
+  Summer: 'summer',
+  Autumn: 'autumn',
+  Winter: 'winter',
 };
-const solarTerms = [
-  {
-    key: '立春',
-    name: '立春',
-    season: '春季',
-    date: '2月3-5日',
-    summary: '万物复苏，春意始生。',
-    detail: `简介：立春是二十四节气之首，每年2月3-5日，太阳到达黄经315°时。“立”是“开始”的意思，立春代表天文意义上春天的开始，寓意万物复苏、生机勃勃，气温逐渐回升。
 
-代表寓意：万物复苏、生机勃发、一年之始
-
-气候特点：乍暖还寒，气温波动大，冷空气活动仍频繁
-
-来历：立春作为二十四节气中的第一个节气，在秦汉以前就已确立。立春习俗迎春活动已有三千多年历史。周代天子在立春前三日斋戒，立春日亲率公卿诸侯大夫前往东郊迎春。
-
-饮食：民间有“咬春”习俗，吃春饼、春卷、萝卜等。东汉《四民月令》记载：“立春日食生菜……取迎新之意”。饮食上宜食辛甘发散之品，如韭菜、豆芽、荠菜等。
-
-习俗：迎春、祭春神、打春牛、咬春、戴春胜等。
-
-养生：宜护肝养阳，早睡早起，适当运动；饮食宜辛甘发散，不宜酸收之味；春捂防寒，保持心情舒畅。`,
-    cover: `${publicPath}/img/105/节气/立春.png`,
-  },
-  {
-    key: '雨水',
-    name: '雨水',
-    season: '春季',
-    date: '2月18-20日',
-    summary: '降雨开始，润物无声。',
-    detail: `简介：每年2月18-20日，太阳到达黄经330°时。雨水节气意味着气温逐渐转暖，降雨开始增多，冰雪融化，大地回春。
-
-代表寓意：降雨开始、润物无声
-
-气候特点：气温回升、降水增多、寒潮仍频
-
-来历：雨水节气的设立与北方地区降雪转为降雨的自然现象有关，是农耕文明的重要时间节点。古代气象谚语有“雨水有雨庄稼好，大春小春一片宝”之说。
-
-饮食：宜少酸增甘以养脾气，多吃蜂蜜、大枣、山药、莲子等甘味食物。北京传统食俗有“望春蜜饼”，以蜂蜜和柚子为馅，寓意健脾消食。
-
-习俗：川西有“雨水节，回娘家”的习俗，出嫁的女儿带罐罐肉等礼物回娘家拜望父母；还有“拉保保”（找干爹）习俗以求孩子平安。
-
-养生：着重养护脾胃，疏肝健脾。可按摩足三里、中脘等穴位驱寒除湿，十指梳头促进气血循环。早春仍寒，注意保暖，不宜过早减衣。`,
-    cover: `${publicPath}/img/105/节气/雨水.png`,
-  },
-  {
-    key: '惊蛰',
-    name: '惊蛰',
-    season: '春季',
-    date: '3月5-7日',
-    summary: '春雷乍动，蛰虫惊醒。',
-    detail: `简介：每年3月5-7日，太阳到达黄经345°时。惊蛰古称“启蛰”，是二十四节气中第三个节气。“蛰”是藏的意思，春雷乍动，惊醒蛰伏冬眠的昆虫动物，万物开始复苏。
-
-代表寓意：春雷乍动、蛰虫惊醒
-
-气候特点：气温回暖、雨水增多、春雷始鸣
-
-来历：汉代为避汉景帝刘启讳而改“启蛰”为“惊蛰”。《月令七十二候集解》：“万物出乎震，震为雷，故曰惊蛰，是蛰虫惊而出走矣。”
-
-饮食：民间有“惊蛰吃梨”的习俗，意在远离疾病。饮食宜清温平淡，多食春笋、菠菜、芹菜、山药、莲子等新鲜蔬菜和富含蛋白质的食物，少食油腻辛辣。
-
-习俗：吃梨、“打小人”驱霉运、祭白虎化解是非。部分地区有祭雷公、蒙鼓皮等习俗。香港等地仍沿袭“打小人”民俗。
-
-养生：重在护肝健脾、顺应阳气生发。饮食宜清淡平和，早睡早起，适当增加户外活动。注意春捂，预防流感。`,
-    cover: `${publicPath}/img/105/节气/惊蛰.png`,
-  },
-  {
-    key: '春分',
-    name: '春分',
-    season: '春季',
-    date: '3月20-22日',
-    summary: '昼夜平分，春光正好。',
-    detail: `简介：每年3月20-22日，太阳到达黄经0°（春分点）。春分是太阳直射赤道的日子，昼夜等长，“春分者，阴阳相半也，故昼夜均而寒暑平”。
-
-代表寓意：昼夜平分、阴阳平衡
-
-气候特点：天气温暖、阳光明媚、寒潮基本结束
-
-来历：春分是最早被确定的四个节气之一，春秋时期已使用土圭测日影方法测定。《月令七十二候集解》：“二月中，分者半也，此当九十日之半，故谓之分。”
-
-饮食：以“平和”为主，多吃时令蔬菜如荠菜、香椿、春笋、菠菜等，注意阴阳平衡。民间有吃春菜的习俗，“春汤灌脏，洗涤肝肠，阖家老少，平安健康”。
-
-习俗：竖蛋（春分到，蛋儿俏）、送春牛图、粘雀子嘴、放风筝、春祭等。
-
-养生：保持阴阳平衡，注意肝气的疏泄调达。饮食宜清淡，忌偏热偏寒。可多到户外散步、踏青，保持心情舒畅。`,
-    cover: `${publicPath}/img/105/节气/春分.png`,
-  },
-  {
-    key: '清明',
-    name: '清明',
-    season: '春季',
-    date: '4月4-6日',
-    summary: '天清地明，祭祖踏青。',
-    detail: `简介：每年4月4-6日，太阳到达黄经15°时。清明既是二十四节气之一，又是中国传统节日，是祭祖扫墓、踏青郊游的日子。
-
-代表寓意：天清地明、气清景明
-
-气候特点：气温升高、雨量增多、草木萌茂
-
-来历：清明节气与上巳节、寒食节融合形成清明节。寒食节禁火、冷食以及扫墓祭祖等核心习俗逐渐融入清明，成为清明节慎终追远的文化内核。
-
-饮食：食青团、子推燕等寒食传统食品，多吃荠菜、苦菜、菠菜等当季野菜，有助清热凉血、缓解春燥。
-
-习俗：扫墓祭祖、踏青郊游、插柳戴柳、放风筝、荡秋千、蹴鞠、吃青团等。
-
-养生：疏肝健脾、防风邪。适量食用当季绿色野菜有助于缓解内热及春季干燥引起的不适。宜早睡早起，多到户外运动，注意情绪调节。`,
-    cover: `${publicPath}/img/105/节气/清明.png`,
-  },
-  {
-    key: '谷雨',
-    name: '谷雨',
-    season: '春季',
-    date: '4月19-21日',
-    summary: '雨生百谷，春耕关键。',
-    detail: `简介：每年4月19-21日，太阳到达黄经30°时。谷雨是春季最后一个节气，取“雨生百谷”之意，此时降水增多，有利于谷物生长。谷雨节气的到来意味着寒潮天气基本画上句号。
-
-代表寓意：雨生百谷、百谷生长
-
-气候特点：降雨增多、空气湿度大、气温上升
-
-来历：谷雨名称源自古人“雨生百谷”之说。《月令七十二候集解》：“三月中，自雨水后，土膏脉动，今又雨其谷于水也。”另有“仓颉造字，天雨粟”的传说。
-
-饮食：北方有食香椿习俗，“雨前香椿嫩如丝”。江南地区谷雨采茶，“谷雨茶”清香怡人。宜多吃祛湿健脾食物，如薏米、山药、赤小豆等。
-
-习俗：祭仓颉（陕西白水县）、喝谷雨茶（南方）、赏牡丹（“谷雨三朝看牡丹”）、食香椿、走谷雨（青年女子走村串亲）。
-
-养生：祛湿健脾护胃是关键。外界湿邪易侵袭人体，需辨证祛湿。可食用小米、芡实、茯苓、白扁豆等健脾食材。勿盲目祛湿，避免过度拔罐汗蒸损伤脾胃。`,
-    cover: `${publicPath}/img/105/节气/谷雨.png`,
-  },
-
-  {
-    key: '立夏',
-    name: '立夏',
-    season: '夏季',
-    date: '5月5-7日',
-    summary: '夏季开始，万物繁盛。',
-    detail: `简介：每年5月5-7日，太阳到达黄经45°时。立夏是夏季的第一个节气，表示盛夏时节的正式开始，“斗指东南，维为立夏，万物至此皆长大，故名立夏也”。2026年立夏为5月5日19时48分。
-
-代表寓意：夏季开始、万物繁盛
-
-气候特点：天气渐热、雷雨增多、植物生长旺盛
-
-来历：古代举行迎夏仪式，君臣一律穿朱色礼服，配朱色玉佩，以表达对丰收的祈愿。《礼记·月令》：“立夏之日，天子亲帅三公九卿大夫以迎夏于南郊。”
-
-饮食：有“尝三鲜”（蚕豆、苋菜、蒜苗）、吃立夏饭（五色饭）、立夏饼、咸鸭蛋等习俗。江南有吃乌米饭的习俗。宜清淡饮食、多食蔬菜水果。
-
-习俗：“称人”（称体重）、斗蛋、吃立夏蛋、七家茶（杭州馈赠邻居新茶）。
-
-养生：养护心脏、清热祛湿。立夏后暑湿渐重，吃鸡蛋可防“疰夏”。宜早睡早起，适当午休。饮食宜清淡，多食苦味清热。`,
-    cover: `${publicPath}/img/105/节气/立夏.png`,
-  },
-  {
-    key: '小满',
-    name: '小满',
-    season: '夏季',
-    date: '5月20-22日',
-    summary: '麦粒渐满，夏耘开始。',
-    detail: `简介：每年5月20-22日，太阳到达黄经60°时。“小满”含义为夏熟作物的籽粒开始灌浆饱满，但还未成熟，只是小满，还未大满。2026年小满为5月21日8时36分。
-
-代表寓意：麦类灌浆、籽粒渐满
-
-气候特点：降雨增多、空气潮湿、天气闷热
-
-来历：《月令七十二候集解》：“四月中，小满者，物致于此小得盈满。”中国南方有“小满不满，芒种不管”的农谚，将小满时的雨水多寡与后续耕作联系起来。
-
-饮食：宜食清热祛湿食物，如冬瓜、苦瓜、薏仁、绿豆等。江南有吃苦菜的习俗，《诗经》：“采苦采苦，首阳之下。”另有吃枸杞苗、蒲公英等野菜的传统。
-
-习俗：祭车神（北方水车灌溉）、祭蚕神（江浙地区）、动三车（水车、油车、丝车）等。
-
-养生：清热利湿、和胃养阴。避免暑湿伤身，注意室内通风。适当运动出汗排湿。`,
-    cover: `${publicPath}/img/105/节气/小满.png`,
-  },
-  {
-    key: '芒种',
-    name: '芒种',
-    season: '夏季',
-    date: '6月5-7日',
-    summary: '作物成熟，忙于播种。',
-    detail: `简介：每年6月5-7日，太阳到达黄经75°时。“芒”指麦类等有芒植物的收获，“种”指谷黍类作物播种的时节。“芒种”谐音“忙种”，是农事最繁忙的时节。
-
-代表寓意：有芒作物成熟、夏播开始
-
-气候特点：气温升高、降雨充沛、高温高湿
-
-来历：《月令七十二候集解》：“五月节，谓有芒之种谷可稼种矣。”古代民间在芒种日举行祭祀花神仪式，饯送花神归位。
-
-饮食：饮食宜清淡、祛暑益气。民间有煮青梅的习俗（“青梅煮酒”），青梅含有多种天然有机酸，有助消除疲劳、增强免疫力。
-
-习俗：煮青梅、送花神、打泥巴仗（侗族）、安苗（皖南祭祀祈求丰收）、吃君踏菜（宁波）。
-
-养生：清热解暑、养心健脾。宜晚睡早起，适当午休。饮食清淡，多食瓜果蔬菜，忌油腻辛辣。`,
-    cover: `${publicPath}/img/105/节气/芒种.png`,
-  },
-  {
-    key: '夏至',
-    name: '夏至',
-    season: '夏季',
-    date: '6月21-22日',
-    summary: '白昼最长，暑气渐盛。',
-    detail: `简介：每年6月21-22日，太阳到达黄经90°（夏至点）时。夏至是太阳直射北回归线的日子，北半球白昼最长、黑夜最短。夏至既是二十四节气之一，也是古时“四时八节”中的一个节日。
-
-代表寓意：日长之至、阳极阴生
-
-气候特点：炎热、暴雨、高温高湿
-
-来历：夏至是最早被确定的节气之一。周代已有夏至祭祀仪式，《周礼·春官》：“以夏日至，致地方物魈。”夏至后第三个庚日开始进入“三伏”。
-
-饮食：“冬至饺子夏至面”，北方有“吃过夏至面，一天短一线”的说法。南方有吃麦粽、夏至饼的习俗。饮食宜清淡，多吃苦味食物，适当吃姜（“冬吃萝卜夏吃姜”）。
-
-习俗：祭神祀祖、消夏避伏、食夏至面、称人（称体重）、互赠折扇脂粉等。部分地区有夏至吃馄饨、夏至饼习俗。
-
-养生：保护阳气，防暑降温。饮食清淡，适量吃苦，少食寒凉，注意水分补充。宜晚睡早起，适当午休。运动宜适度。`,
-    cover: `${publicPath}/img/105/节气/夏至.png`,
-  },
-  {
-    key: '小暑',
-    name: '小暑',
-    season: '夏季',
-    date: '7月6-8日',
-    summary: '暑热初起，伏天将至。',
-    detail: `简介：每年7月6-8日，太阳到达黄经105°时。暑，表示炎热的意思，小暑为小热，还不是一年中最炎热的时节。但小暑过后即将进入“三伏天”，暑热渐盛。
-
-代表寓意：暑热初起、伏天将至
-
-气候特点：天气炎热、雷暴频繁、高温多雨
-
-来历：《月令七十二候集解》：“六月节……暑，热也，就热之中分为大小，月初为小，月中为大，今则热气犹小也。”民间有“小暑大暑，上蒸下煮”之说。
-
-饮食：饮食以清淡、清热解暑为主。北方有“头伏饺子二伏面”习俗，南方有食藕（蜜汁藕）、食新（尝新米）习俗，山东部分地区吃生黄瓜和煮鸡蛋。
-
-习俗：食新、晒书画衣物（曝晒防霉）、游伏（“游伏”谐音“有福”）、斗蛐蛐等。
-
-养生：清热消暑、养心安神。防中暑，适当食用西瓜、绿豆汤等清凉解暑之物。忌过度贪凉，避免寒邪入侵。`,
-    cover: `${publicPath}/img/105/节气/小暑.png`,
-  },
-  {
-    key: '大暑',
-    name: '大暑',
-    season: '夏季',
-    date: '7月22-24日',
-    summary: '炎热至极，湿热交蒸。',
-    detail: `简介：每年7月22-24日，太阳到达黄经120°时。大暑是一年中最热的时期，高温酷热达到顶峰，“湿热交蒸”在此时到达顶点。
-
-代表寓意：炎热至极、湿热交蒸
-
-气候特点：高温酷暑、雷阵雨多、台风频繁
-
-来历：《月令七十二候集解》：“六月中，解见小暑。”大暑节气正值“三伏天”里的“中伏”前后，是一年中最热的时期。
-
-饮食：饮食宜清淡营养，多吃清热解暑食物。南方有吃仙草（广东）、喝暑羊（山东）、饮伏茶、晒伏姜习俗，大暑吃童子鸡习俗流行于南方多地。
-
-习俗：送大暑船（浙江台州，为国家级非遗）、斗蟋蟀、吃荔枝、喝暑羊、饮伏茶、晒伏姜等。
-
-养生：重在防暑降温、清心降火。避免高温时段外出，多饮水，饮食清淡。可食用绿豆、冬瓜、苦瓜等清热食物，注意防湿。`,
-    cover: `${publicPath}/img/105/节气/大暑.png`,
-  },
-
-  {
-    key: '立秋',
-    name: '立秋',
-    season: '秋季',
-    date: '8月7-9日',
-    summary: '秋季开始，暑热不尽。',
-    detail: `简介：每年8月7-9日，太阳到达黄经135°时。立秋是秋季的第一个节气，表示秋季的开始，但立秋并不代表酷热天气的结束，“秋后一伏”仍可能出现高温。
-
-代表寓意：秋季开始、暑去凉来
-
-气候特点：暑热渐消、昼夜温差增大、降雨减少
-
-来历：古代立秋之日，天子率公卿大夫迎秋于西郊。《礼记·月令》：“立秋之日，天子亲帅三公九卿诸侯大夫以迎秋于西郊。”宋代立秋日有戴楸叶、食瓜饮水的习俗。
-
-饮食：“贴秋膘”（吃肉进补）、咬秋（吃西瓜）、喝秋粥。秋季进补以“清补”为原则，选择温和滋润食材。适当多吃梨、芝麻、蜂蜜等润燥食物。
-
-习俗：贴秋膘、啃秋（吃西瓜）、晒秋（山区村民晾晒农作物）、秋忙会、秋收互助等。
-
-养生：养阴防燥、润肺生津。早睡早起，收敛神气。饮食以滋阴润肺为主，少辛增酸。`,
-    cover: `${publicPath}/img/105/节气/立秋.png`,
-  },
-  {
-    key: '处暑',
-    name: '处暑',
-    season: '秋季',
-    date: '8月22-24日',
-    summary: '暑气渐止，秋意将至。',
-    detail: `简介：每年8月22-24日，太阳到达黄经150°时。“处”是终止的意思，处暑表示暑气至此而止，炎热渐消，秋意渐浓。
-
-代表寓意：暑气消退、秋凉将至
-
-气候特点：气温下降、秋高气爽、昼夜温差大
-
-来历：《月令七十二候集解》：“七月中，处，止也，暑气至此而止矣。”民间有“处暑十八盆”的说法，指处暑后天气仍有余热，但日渐转凉。
-
-饮食：滋阴润燥为主，宜食鸭肉（处暑百合鸭）、莲藕、银耳、梨等。福州有吃龙眼配稀饭的习俗，老福州有“处暑吃龙眼，胜过吃补药”之说。
-
-习俗：祭祖迎秋、放河灯（中元节前后）、开渔节（沿海地区）、出游迎秋、吃鸭肉等。
-
-养生：防秋燥、养肺阴。早睡早起，适当“秋冻”不宜过暖。多食润燥食物，多喝水。`,
-    cover: `${publicPath}/img/105/节气/处暑.png`,
-  },
-  {
-    key: '白露',
-    name: '白露',
-    season: '秋季',
-    date: '9月7-9日',
-    summary: '露白成霜，秋凉初现。',
-    detail: `简介：每年9月7-9日，太阳到达黄经165°时。白露表示天气转凉，夜间空气中的水汽遇冷凝结成露水，因露珠色白而得名。民谚有“白露秋分夜，一夜冷一夜”之说。
-
-代表寓意：天气转凉、露凝而白
-
-气候特点：昼夜温差大、秋燥明显、气温明显下降
-
-来历：《月令七十二候集解》：“水土湿气凝而为露，秋属金，金色白，白者露之色，而气始寒也。”《诗经》亦有“蒹葭苍苍，白露为霜”的著名诗句。
-
-饮食：润燥为主，宜食龙眼、红薯、白露米酒、白露茶等。浙江温州等地有吃“十样白”（十种带白字的草药炖汤）习俗，太湖畔有饮白露米酒传统。
-
-习俗：收清露（古人以露水明目治病）、饮白露茶、酿米酒、祭禹王（太湖地区）等。
-
-养生：防秋燥、养肺润肤。早晚添衣保暖，不宜赤膊露体。多食银耳、百合、梨等滋阴润肺食物。`,
-    cover: `${publicPath}/img/105/节气/白露.png`,
-  },
-  {
-    key: '秋分',
-    name: '秋分',
-    season: '秋季',
-    date: '9月22-24日',
-    summary: '昼夜平分，秋色正浓。',
-    detail: `简介：每年9月22-24日，太阳到达黄经180°（秋分点）时。秋分当日太阳直射赤道，全球昼夜等长。“分者平也，此当九十日之半，故谓之分”。
-
-代表寓意：昼夜平分、秋季过半
-
-气候特点：秋高气爽、干燥少雨、气温持续下降
-
-来历：秋分最早由土圭测日影法确定。《月令七十二候集解》：“八月中，解见春分。”古代有“春祭日，秋祭月”之说，秋分曾是传统的“祭月节”，后来演变为中秋节。
-
-饮食：滋阴润肺、养阴生津为主。可多食用茯苓、芡实、山药等补益脾肾之物。南方有吃秋菜（野苋菜）的习俗，岭南地区“秋汤灌脏，洗涤肝肠”。
-
-习俗：祭月（古时）、吃秋菜、送秋牛图、粘雀子嘴、竖蛋等。
-
-养生：以“平”补秋，滋阴润燥。秋分后容易出现凉燥证，表现为口唇干燥、干咳不止等。饮食以滋阴润肺为主，起居上宜早睡早起。`,
-    cover: `${publicPath}/img/105/节气/秋分.png`,
-  },
-  {
-    key: '寒露',
-    name: '寒露',
-    season: '秋季',
-    date: '10月7-9日',
-    summary: '寒气渐起，露冷成寒。',
-    detail: `简介：每年10月7-9日，太阳到达黄经195°时。寒露是气候从凉爽到寒冷的过渡节点，地面的露水更冷，快要凝结成霜，“寒露寒露，遍地冷露”。
-
-代表寓意：露水更寒、寒气渐生
-
-气候特点：气温骤降、露水冰凉、秋意更深
-
-来历：《月令七十二候集解》：“九月节，露气寒冷，将凝结也。”寒露时节正值农历九月，故又称“菊月”，是赏菊的最佳时节。
-
-饮食：温润防寒、滋阴防燥。可适当增加温热性食物如羊肉，搭配银耳、蜂蜜等柔润食材，水果宜熟吃如蒸梨、煮苹果。江南有食蟹、饮寒露茶习俗，北方有吃芝麻、绿豆糕传统。
-
-习俗：登高（重阳前后）、赏菊花、饮菊花酒、吃花糕、食蟹、秋钓等。
-
-养生：防寒保暖、润肺生津。注意足部保暖，“寒从脚起”。适当吃温热食物防寒，同时兼顾滋阴润燥。`,
-    cover: `${publicPath}/img/105/节气/寒露.png`,
-  },
-  {
-    key: '霜降',
-    name: '霜降',
-    season: '秋季',
-    date: '10月23-24日',
-    summary: '霜始降，秋末寒意。',
-    detail: `简介：每年10月23-24日，太阳到达黄经210°时。霜降是秋季最后一个节气，天气渐冷，开始有霜出现，“气肃而凝，露结为霜”。
-
-代表寓意：天气渐冷、始有霜降
-
-气候特点：气温骤降、秋燥明显、晨有白霜
-
-来历：《月令七十二候集解》：“九月中，气肃而凝，露结为霜矣。”壮族有霜降节传统，为国家级非物质文化遗产，广西天等县举行盛大庆典纪念民族英雄。
-
-饮食：“补霜降”，北方吃柿子、涮羊肉，南方进补鸭肉。柿子被认为可御寒保暖、补筋骨。饮食上需省辛增酸，多吃山楂、石榴等酸味食材，助肺气收敛。
-
-习俗：吃柿子、赏菊、登高、送芋鬼（广东高明）、壮族霜降节等。
-
-养生：“补霜降”重在温补御寒、润燥养肺。北方有“一年补透透，不如补霜降”的说法。宜早睡早起，适当进补，预防秋燥和呼吸道疾病。`,
-    cover: `${publicPath}/img/105/节气/霜降.png`,
-  },
-
-  {
-    key: '立冬',
-    name: '立冬',
-    season: '冬季',
-    date: '11月7-8日',
-    summary: '冬季开始，万物收藏。',
-    detail: `简介：每年11月7-8日，太阳到达黄经225°时。立冬是冬季的第一个节气，表示冬季自此开始，草木凋零、蛰虫休眠，万物进入冬藏状态。
-
-代表寓意：冬季开始、万物收藏
-
-气候特点：气温骤降、寒风渐起、天气干燥
-
-来历：立冬在古代是重要节日，天子率百官迎冬于北郊。《礼记·月令》：“立冬之日，天子亲帅三公九卿大夫以迎冬于北郊。”有“立冬补冬”之说。
-
-饮食：“立冬补冬”，宜温补食物。北方吃饺子（“立冬不端饺子碗，冻掉耳朵没人管”），南方吃鸡鸭鱼肉、麻油鸡、姜母鸭等温补食物，绍兴有立冬之日开始酿黄酒习俗。
-
-习俗：补冬、吃饺子、迎冬（古礼）、贺冬（拜师）、冬泳等。
-
-养生：重在“藏”字，早睡晚起，避寒保暖。饮食宜温补，适当增加高热量食物，为过冬储备能量。`,
-    cover: `${publicPath}/img/105/节气/立冬.png`,
-  },
-  {
-    key: '小雪',
-    name: '小雪',
-    season: '冬季',
-    date: '11月22-23日',
-    summary: '雪始降，寒气加重。',
-    detail: `简介：每年11月22-23日，太阳到达黄经240°时。小雪节气表示降雪的起始，但雪量不大，故称“小雪”。黄河流域开始出现初雪。
-
-代表寓意：开始降雪、寒气渐重
-
-气候特点：气温持续下降、开始降雪、空气干燥寒冷
-
-来历：《月令七十二候集解》：“十月中，雨下而为寒气所薄，故凝而为雪。小者未盛之辞。”民间有“小雪封地，大雪封河”的说法。
-
-饮食：温补为主，宜食羊肉、牛肉等温热食物。南方有吃糍粑（农历十月）的习俗，北方腌制腊肉、香肠以备过年。土家族有吃“刨汤”习俗（杀年猪宴请亲友）。
-
-习俗：腌制腊肉、吃糍粑、晒鱼干、酿小雪酒等。
-
-养生：温补助阳、防寒保暖。宜食羊肉、核桃、红枣等温补食物。注意保暖防冻，适当运动。`,
-    cover: `${publicPath}/img/105/节气/小雪.png`,
-  },
-  {
-    key: '大雪',
-    name: '大雪',
-    season: '冬季',
-    date: '12月6-8日',
-    summary: '雪量增多，寒冬来临。',
-    detail: `简介：每年12月6-8日，太阳到达黄经255°时。大雪节气降雪量比小雪时更大，黄河流域渐有积雪，中国大部分地区进入寒冬。
-
-代表寓意：降雪增多、天寒地冻
-
-气候特点：气温显著下降、降雪增多、冰冻出现
-
-来历：《月令七十二候集解》：“十一月节，大者盛也，至此而雪盛也。”老南京有“小雪腌菜，大雪腌肉”的谚语，家家户户忙着腌制“咸货”迎接新年。
-
-饮食：温补助阳，宜食羊肉、牛肉、红枣、桂圆等温补食物。南京等地有吃红枣糕习俗，鲁北地区有喝红薯粥传统（“碌碡顶了门，光喝红黏粥”）。
-
-习俗：腌制腊肉、观赏封河、进补（大雪是进补好时节）、滑冰等。
-
-养生：重在温补御寒、养肾防寒。早睡晚起，避寒保暖。饮食宜温补助阳，适当进补羊肉、牛肉等。`,
-    cover: `${publicPath}/img/105/节气/大雪.png`,
-  },
-  {
-    key: '冬至',
-    name: '冬至',
-    season: '冬季',
-    date: '12月21-23日',
-    summary: '白昼最短，阴极阳生。',
-    detail: `简介：每年12月21-23日，太阳到达黄经270°（冬至点）时。冬至是太阳直射南回归线的日子，北半球白昼最短、黑夜最长的一天。古有“冬至大如年”的说法，冬至被称为“亚岁”，是重要的传统节日。
-
-代表寓意：日短之至、阴极阳生
-
-气候特点：严寒、数九寒天开始
-
-来历：冬至是最早被确定的节气之一，周代已有冬至祭祀仪式。《月令七十二候集解》：“冬至，十一月中。终藏之气，至此而极也。”唐宋时期，冬至是祭天祭祖的重要日子，官府放假，百姓更衣备食，享祀先祖。
-
-饮食：北方吃饺子、馄饨，南方吃汤圆、米团、冬至酿酒。“冬至馄饨夏至面”是传统说法。饮食宜温补、滋养，重在补肾温阳、益精养血，可适量增加羊肉、牛肉、核桃、黑芝麻等温性食物。
-
-习俗：祭天祭祖、吃饺子/汤圆、数九（画九九消寒图）、赠鞋帽给长辈、吃赤豆糯米饭等。
-
-养生：以“藏”为核心，固护初生微阳。早卧晚起，必待日光，精神内守，避寒保暖。防寒保暖是第一要务，需特别注意头部、背部、腰腹及足部保暖。运动宜舒缓内敛，如太极拳、八段锦等。`,
-    cover: `${publicPath}/img/105/节气/冬至.png`,
-  },
-  {
-    key: '小寒',
-    name: '小寒',
-    season: '冬季',
-    date: '1月5-7日',
-    summary: '寒气渐盛，严冬开始。',
-    detail: `简介：每年1月5-7日，太阳到达黄经285°时。小寒是冬季第五个节气，标志着一年中最寒冷日子的开始，俗语有“小寒大寒，冷成冰团”之说。
-
-代表寓意：寒气渐盛、严冬到来
-
-气候特点：天寒地冻、滴水成冰、一年中最冷
-
-来历：《月令七十二候集解》：“十二月节，月初寒尚小，故云。月半则大矣。”民间有“冷在三九”的说法，而“三九”多在1月9日至17日，恰在小寒节气内。
-
-饮食：温补御寒，宜食羊肉、牛肉、核桃、红枣等。广东有吃糯米饭的习俗，南京有吃菜饭的传统（用矮脚黄青菜与咸肉片、香肠片、板鸭丁等煮制）。
-
-习俗：探梅（腊梅盛开）、冰戏（北方冰上活动）、采购年货（春节准备）、吃腊八粥（接近腊八节）等。
-
-养生：重在温补防寒、养肾藏精。早睡晚起，注意保暖。饮食宜温热，少食生冷寒凉。`,
-    cover: `${publicPath}/img/105/节气/小寒.png`,
-  },
-  {
-    key: '大寒',
-    name: '大寒',
-    season: '冬季',
-    date: '1月20-21日',
-    summary: '寒极将尽，春近未远。',
-    detail: `简介：每年1月20-21日，太阳到达黄经300°时。大寒是二十四节气中的最后一个节气，是天气寒冷至极点的意思，也是冬季即将结束、春回大地的过渡时期。
-
-代表寓意：寒气逆极、寒尽春来
-
-气候特点：天寒地冻、冰天雪地、大风降温频繁
-
-来历：《月令七十二候集解》：“十二月中，解见前（小寒）。”大寒之后便是立春，古人认为大寒是“冬藏”转“春生”的关键时期。
-
-饮食：南方有食糯米的习俗（糯米饭、年糕、糍粑等），糯米性温，能暖胃驱寒，寓意生活甜蜜、年年高升。北方吃消寒糕（年糕）。广东佛山有瓦锅蒸煮糯米饭习俗，安徽安庆有大寒炸春卷习俗。饮食宜减咸增苦以养心气，忌黏硬生冷食物。
-
-习俗：尾牙祭（商家一年活动尾声）、食糯、除尘（大扫除）、糊窗、赶集、做牙祭、大寒迎年等。
-
-养生：防风御寒为第一原则，进补量逐渐减少，多添加升散性质食物以适应春天升发。宜食牛羊肉、红枣等温补食物防风寒，同时注意早睡晚起，待日出后再活动。`,
-    cover: `${publicPath}/img/105/节气/大寒.png`,
-  },
+const termNames = [
+  ['立春', 'Start of Spring', 'Li Chun', 'Spring', 'Feb 3-5', 'Spring begins and living things start to wake.'],
+  ['雨水', 'Rain Water', 'Yu Shui', 'Spring', 'Feb 18-20', 'Moisture returns and rainfall gradually increases.'],
+  ['惊蛰', 'Awakening of Insects', 'Jing Zhe', 'Spring', 'Mar 5-7', 'Spring thunder awakens hidden life.'],
+  ['春分', 'Spring Equinox', 'Chun Fen', 'Spring', 'Mar 20-22', 'Day and night are nearly balanced.'],
+  ['清明', 'Pure Brightness', 'Qing Ming', 'Spring', 'Apr 4-6', 'Clear skies, spring outings, and remembrance.'],
+  ['谷雨', 'Grain Rain', 'Gu Yu', 'Spring', 'Apr 19-21', 'Rain nourishes crops and supports growth.'],
+  ['立夏', 'Start of Summer', 'Li Xia', 'Summer', 'May 5-7', 'Summer begins and plants flourish.'],
+  ['小满', 'Grain Full', 'Xiao Man', 'Summer', 'May 20-22', 'Grains become full but are not yet mature.'],
+  ['芒种', 'Grain in Ear', 'Mang Zhong', 'Summer', 'Jun 5-7', 'Harvest and sowing enter a busy period.'],
+  ['夏至', 'Summer Solstice', 'Xia Zhi', 'Summer', 'Jun 21-22', 'The longest daylight of the year arrives.'],
+  ['小暑', 'Lesser Heat', 'Xiao Shu', 'Summer', 'Jul 6-8', 'Heat begins to build before the hottest days.'],
+  ['大暑', 'Greater Heat', 'Da Shu', 'Summer', 'Jul 22-24', 'The hottest and most humid period arrives.'],
+  ['立秋', 'Start of Autumn', 'Li Qiu', 'Autumn', 'Aug 7-9', 'Autumn begins while heat may remain.'],
+  ['处暑', 'End of Heat', 'Chu Shu', 'Autumn', 'Aug 22-24', 'Summer heat gradually fades.'],
+  ['白露', 'White Dew', 'Bai Lu', 'Autumn', 'Sep 7-9', 'Cooler nights bring visible dew.'],
+  ['秋分', 'Autumn Equinox', 'Qiu Fen', 'Autumn', 'Sep 22-24', 'Day and night return to balance.'],
+  ['寒露', 'Cold Dew', 'Han Lu', 'Autumn', 'Oct 8-9', 'Dew turns colder and autumn deepens.'],
+  ['霜降', 'Frost Descent', 'Shuang Jiang', 'Autumn', 'Oct 23-24', 'Frost may appear as temperatures drop.'],
+  ['立冬', 'Start of Winter', 'Li Dong', 'Winter', 'Nov 7-8', 'Winter begins and nature enters storage.'],
+  ['小雪', 'Lesser Snow', 'Xiao Xue', 'Winter', 'Nov 22-23', 'Snow may begin, usually in small amounts.'],
+  ['大雪', 'Greater Snow', 'Da Xue', 'Winter', 'Dec 6-8', 'Snow becomes more likely and heavier.'],
+  ['冬至', 'Winter Solstice', 'Dong Zhi', 'Winter', 'Dec 21-23', 'The shortest day and longest night arrive.'],
+  ['小寒', 'Lesser Cold', 'Xiao Han', 'Winter', 'Jan 5-7', 'The coldest part of the year begins.'],
+  ['大寒', 'Greater Cold', 'Da Han', 'Winter', 'Jan 20-21', 'Cold reaches its limit before spring returns.'],
 ];
 
-const groupedTerms = solarTerms.reduce(
-  (acc, term) => {
-    if (!acc[term.season]) acc[term.season] = [];
-    acc[term.season].push(term);
-    return acc;
-  },
-  { 春季: [], 夏季: [], 秋季: [], 冬季: [] }
-);
+const solarTerms = termNames.map(([key, name, pinyin, season, date, summary]) => ({
+  key,
+  name,
+  pinyin,
+  season,
+  date,
+  summary,
+  cover: `${publicPath}/img/105/节气/${key}.png`,
+  sections: [
+    ['Overview', `${name} usually falls around ${date}. It is one of the 24 traditional Chinese solar terms and reflects seasonal changes in climate, farming, and daily life.`],
+    ['Symbolic Meaning', summary],
+    ['Climate', 'The weather changes according to the season, affecting temperature, rainfall, humidity, wind, and daily routines.'],
+    ['Origin', 'The solar terms were developed through long-term observation of the sun, climate, agriculture, and seasonal rhythms in ancient China.'],
+    ['Food', 'Seasonal food is recommended, with attention to balance, hydration, digestion, and local customs.'],
+    ['Customs', 'Traditional customs may include seasonal food, farming rituals, family activities, outings, or remembrance depending on the term.'],
+    ['Wellness', 'Health advice follows the seasonal rhythm: keep warm in cold periods, avoid heat in summer, balance the body in spring and autumn, and maintain steady routines.'],
+  ],
+}));
 
-function renderDetail(text) {
-  const sections = text.split('\n\n');
-  return sections.map((section, index) => {
-    const [title, ...rest] = section.split('：');
-    const content = rest.join('：');
-    const hasHeading = ['简介', '代表寓意', '气候特点', '来历', '饮食', '习俗', '养生'].includes(title.trim());
-
-    if (hasHeading) {
-      return (
-        <p key={index} className={index === 0 ? 'detail-intro' : 'detail-section'}>
-          <strong>{title}：</strong>
-          {content}
-        </p>
-      );
-    }
-
-    return (
-      <p key={index} className="detail-section">
-        {section}
-      </p>
-    );
-  });
-}
+const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
 
 function Calendar() {
   const [selectedTerm, setSelectedTerm] = useState(null);
 
   return (
-    <div className="calendar-page">
-      <div className="calendar-header">
-        <h2 className="calendar-title">The 24 Solar Terms</h2>
-      </div>
-
+    <main className="calendar-page">
+      <header className="calendar-header">
+        <h1 className="calendar-title">24 Solar Terms</h1>
+      </header>
       <p className="calendar-subtitle">
-        Click any solar term card to view the full introduction
+        Explore traditional Chinese seasonal culture through English solar term names, pinyin, images, and concise detail pages.
       </p>
 
-      {Object.entries(groupedTerms).map(([season, terms]) => (
-        <section key={season} className="season-row">
-          <h3 className={`season-title ${seasonClassMap[season]}`}>{season}</h3>
+      {seasons.map((season) => (
+        <section className="season-row" key={season}>
+          <h2 className={`season-title ${seasonClassMap[season]}`}>{season}</h2>
           <div className="term-grid">
-            {terms.map((term) => (
+            {solarTerms.filter((term) => term.season === season).map((term) => (
               <button
                 key={term.key}
                 type="button"
-                className={`term-card ${seasonClassMap[term.season]}`}
+                className={`term-card ${seasonClassMap[season]}`}
                 onClick={() => setSelectedTerm(term)}
               >
                 <div className="term-card-thumb">
@@ -581,6 +86,7 @@ function Calendar() {
                 </div>
                 <div className="term-card-content">
                   <div className="term-card-name">{term.name}</div>
+                  <div className="term-card-pinyin">{term.pinyin}</div>
                   <div className="term-card-date">{term.date}</div>
                   <div className="term-card-summary">{term.summary}</div>
                 </div>
@@ -592,28 +98,29 @@ function Calendar() {
 
       {selectedTerm && (
         <div className="term-modal-overlay" onClick={() => setSelectedTerm(null)}>
-          <div className="term-modal" onClick={(e) => e.stopPropagation()}>
+          <article className="term-modal" onClick={(event) => event.stopPropagation()}>
             <div className="modal-cover">
               <img src={selectedTerm.cover} alt={selectedTerm.name} />
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => setSelectedTerm(null)}
-              >
-                ×
-              </button>
+              <button className="modal-close" type="button" onClick={() => setSelectedTerm(null)}>x</button>
             </div>
             <div className="modal-body">
               <div className="modal-headline">
                 <h3>{selectedTerm.name}</h3>
-                <div className="meta">{selectedTerm.date} · {selectedTerm.season}</div>
+                <div className="meta">{selectedTerm.pinyin} · {selectedTerm.date}</div>
               </div>
-              <div className="detail">{renderDetail(selectedTerm.detail)}</div>
+              <div className="detail">
+                {selectedTerm.sections.map(([title, content]) => (
+                  <p key={title}>
+                    <strong>{title}</strong>
+                    {content}
+                  </p>
+                ))}
+              </div>
             </div>
-          </div>
+          </article>
         </div>
       )}
-    </div>
+    </main>
   );
 }
 

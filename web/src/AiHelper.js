@@ -1,16 +1,48 @@
 import React, { useState } from 'react';
+import { apiRequest } from './api';
 import './AiHelper.css';
 
 const iconBase = '/img/105';
 
 function AiHelper() {
   const [msg, setMsg] = useState('');
+  const [reply, setReply] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState([]);
 
   const suggestions = [
     'What is suitable to wear today?',
     'Will it rain in the next few hours?',
     'Help me compare the weather between A and B.',
   ];
+
+  const sendMessage = async () => {
+    const text = msg.trim();
+    if (!text || loading) return;
+
+    const nextHistory = [...history, { role: 'user', content: text }];
+    setHistory(nextHistory);
+    setLoading(true);
+    setReply('');
+
+    try {
+      const data = await apiRequest('/api/ai/chat', {
+        method: 'POST',
+        body: JSON.stringify({
+          city: 'Fuzhou',
+          messages: nextHistory,
+        }),
+      });
+      const assistantReply = data.reply || 'No reply returned.';
+      setReply(assistantReply);
+      setHistory([...nextHistory, { role: 'assistant', content: assistantReply }]);
+      setMsg('');
+    } catch (err) {
+      setReply(err.message || 'AI request failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="ai-helper-page">
@@ -52,8 +84,20 @@ function AiHelper() {
         <textarea
           value={msg}
           onChange={(event) => setMsg(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault();
+              sendMessage();
+            }
+          }}
           placeholder="Initiate a query or send a command to the AI ......"
         />
+
+        {reply && (
+          <div className="ai-reply-box">
+            {reply}
+          </div>
+        )}
 
         <div className="ai-input-actions">
           <button type="button" className="ai-link-button" aria-label="Attach a link">
@@ -64,7 +108,7 @@ function AiHelper() {
             <button type="button" className="ai-sound-button" aria-label="Voice input">
               <img src={`${iconBase}/sound.svg`} alt="" />
             </button>
-            <button type="button" className="ai-send-button" aria-label="Send message">
+            <button type="button" className="ai-send-button" aria-label="Send message" onClick={sendMessage} disabled={loading}>
               <img src={`${iconBase}/send.svg`} alt="" />
             </button>
           </div>

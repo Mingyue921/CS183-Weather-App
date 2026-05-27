@@ -1,52 +1,117 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
+import { apiRequest } from './api';
 import './Setting.css';
 
+const defaultContext = {
+  city: 'Fuzhou',
+  lat: 26.08,
+  lon: 119.3,
+  weather: {
+    temp: 24,
+    description: 'current weather',
+    humidity: 70,
+    windSpeed: 3,
+    uvi: 0,
+  },
+};
+
 const adviceItems = [
-  {
-    id: 'warning',
-    emoji: '⚠️',
-    title: 'Early Warning',
-    subtitle: 'Weather alert',
-    contentTitle: '预警建议',
-    content: '当前天气存在雷暴、大风或强降雨风险。外出请随时关注天气变化，避免河道、空旷地和高树下停留。必要时暂缓出行。',
-  },
-  {
-    id: 'diet',
-    emoji: '🍽️',
-    title: 'Dietary Recommendations',
-    subtitle: 'Eat smart today',
-    contentTitle: '饮食建议',
-    content: '建议少吃辛辣油腻，选择清淡易消化的蔬菜、水果、粥品与汤类。炎热时多补充水分，湿冷时宜温热养胃。',
-  },
-  {
-    id: 'travel',
-    emoji: '🚗',
-    title: 'Travel Advice',
-    subtitle: 'Go safely',
-    contentTitle: '出行建议',
-    content: '道路可能湿滑、能见度下降。驾车请减速慢行，骑行佩戴头盔并备雨具。尽量优先选择地铁、公交等公共交通。',
-  },
-  {
-    id: 'dressing',
-    emoji: '👕',
-    title: 'Dressing Advice',
-    subtitle: 'What to wear',
-    contentTitle: '穿衣建议',
-    content: '早晚温差较大，建议“薄外套 + 长袖内搭”组合。若有降雨，额外带一件轻便雨衣，并注意足部保暖。',
-  },
-  {
-    id: 'activity',
-    emoji: '🏃',
-    title: 'Outdoor Activities',
-    subtitle: 'Exercise tips',
-    contentTitle: '活动建议',
-    content: '适合进行短时散步、慢跑等轻度户外活动。若出现暴雨或大风天气，应避免登山、露营等高风险活动。',
-  },
+  { id: 'warning', type: 'warning', icon: '\u26A0\uFE0F', title: 'Early Warning', subtitle: 'Government weather alerts' },
+  { id: 'diet', type: 'diet', icon: '\uD83C\uDF7D\uFE0F', title: 'Food Advice', subtitle: 'AI dietary suggestions' },
+  { id: 'travel', type: 'travel', icon: '\uD83D\uDE97', title: 'Travel Advice', subtitle: 'AI travel guidance' },
+  { id: 'clothing', type: 'clothing', icon: '\uD83D\uDC55', title: 'Clothing Advice', subtitle: 'AI outfit suggestions' },
+  { id: 'activity', type: 'activity', icon: '\uD83C\uDFC3', title: 'Activity Advice', subtitle: 'AI exercise suggestions' },
 ];
 
+const serviceItems = [
+  { icon: '\uD83C\uDF24\uFE0F', title: 'Solar Terms' },
+  { icon: '\uD83D\uDCD6', title: 'Weather Wiki' },
+  { icon: '\uD83D\uDCCD', title: 'City Management' },
+  { icon: '\u2601\uFE0F', title: 'Offline Data' },
+];
+
+const settingRows = [
+  { icon: '/img/105/account.svg', title: 'Account Information' },
+  { icon: '/img/105/theme.svg', title: 'Themed Appearance' },
+  { icon: '/img/105/lock.svg', title: 'Privacy Security' },
+  { icon: '/img/105/help.svg', title: 'Help and Feedback' },
+  { icon: '/img/105/about.svg', title: 'About us' },
+];
+
+function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem('currentUser') || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function getWeatherContext() {
+  try {
+    return { ...defaultContext, ...JSON.parse(localStorage.getItem('currentWeatherContext') || '{}') };
+  } catch {
+    return defaultContext;
+  }
+}
+
 export default function Setting() {
+  const [user, setUser] = useState(getStoredUser);
   const [selectedAdvice, setSelectedAdvice] = useState(null);
+  const [modalContent, setModalContent] = useState('');
+  const [modalLoading, setModalLoading] = useState(false);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      if (!localStorage.getItem('token')) return;
+      try {
+        const data = await apiRequest('/api/auth/me');
+        setUser(data.user);
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+      } catch {
+        setUser(getStoredUser());
+      }
+    };
+    loadUser();
+  }, []);
+
+  const openAdvice = async (item) => {
+    const context = getWeatherContext();
+    setSelectedAdvice(item);
+    setModalContent('');
+    setModalLoading(true);
+
+    try {
+      if (item.type === 'warning') {
+        const data = await apiRequest(`/api/weather/alerts?lat=${encodeURIComponent(context.lat)}&lon=${encodeURIComponent(context.lon)}`);
+        if (data.warning) {
+          setModalContent(data.warning);
+        } else if (data.alerts?.length) {
+          setModalContent(data.alerts.map((alert) => `${alert.event}: ${alert.description}`).join('\n\n'));
+        } else {
+          setModalContent(`No active government weather alerts for ${context.city}.`);
+        }
+        return;
+      }
+
+      const data = await apiRequest('/api/ai/advice', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: item.type,
+          city: context.city,
+          weather: context.weather,
+        }),
+      });
+      setModalContent(data.reply || 'No advice returned.');
+    } catch (err) {
+      setModalContent(err.message || 'This service is temporarily unavailable.');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const nickname = user.nickname || 'Sunny Nuan';
+  const userId = user.id || '0000001';
 
   return (
     <div className="app-container">
@@ -62,18 +127,11 @@ export default function Setting() {
           </div>
 
           <div className="user-card">
-            <img src="/img/105/avatar.svg" alt="user avatar" className="user-avatar" />
+            <img src={user.avatarUrl || '/img/105/avatar.svg'} alt="user avatar" className="user-avatar" />
             <div className="user-info">
-              <div className="user-name-row">
-                <h2 className="user-name">Sunny</h2>
-                <span className="vip-tag">VIP member</span>
-              </div>
-              <p className="user-id">ID: 2847391 · Used for 247 days</p>
-              <div className="progress-bar">
-                <div className="progress-fill"></div>
-                <span className="progress-text">63%</span>
-              </div>
-              <p className="expire-text">Membership expires: 2026.05.12</p>
+              <h2 className="user-name">{nickname}</h2>
+              <p className="user-id">ID: {userId}</p>
+              <p className="user-email">{user.email || 'No email available'}</p>
             </div>
           </div>
 
@@ -85,11 +143,12 @@ export default function Setting() {
                   <button
                     key={item.id}
                     type="button"
-                    className="index-item"
-                    onClick={() => setSelectedAdvice(item)}
+                    className="index-item clickable"
+                    onClick={() => openAdvice(item)}
                   >
-                    <span className="item-icon">{item.emoji}</span>
+                    <span className="item-icon">{item.icon}</span>
                     <span>{item.title}</span>
+                    <small>{item.subtitle}</small>
                   </button>
                 ))}
               </div>
@@ -98,74 +157,42 @@ export default function Setting() {
             <div className="right-column">
               <div className="section-title">My Service</div>
               <div className="service-grid">
-                <div className="service-item">
-                  <span className="item-icon">🌱</span>
-                  <span>Solar Terms</span>
-                </div>
-                <div className="service-item">
-                  <span className="item-icon">📖</span>
-                  <span>Weather Wiki</span>
-                </div>
-                <div className="service-item">
-                  <span className="item-icon">📍</span>
-                  <span>City Management</span>
-                </div>
-                <div className="service-item">
-                  <span className="item-icon">☁️</span>
-                  <span>Offline Data</span>
-                </div>
+                {serviceItems.map((item) => (
+                  <div className="service-item" key={item.title}>
+                    <span className="item-icon">{item.icon}</span>
+                    <span>{item.title}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
           <div className="section-title">Settings and Help</div>
           <div className="setting-list">
-            <div className="setting-row">
-              <img src="/img/105/account.svg" alt="" className="row-icon" />
-              <span>Account Information</span>
-              <span className="arrow">›</span>
-            </div>
-            <div className="setting-row">
-              <img src="/img/105/theme.svg" alt="" className="row-icon" />
-              <span>Themed Appearance</span>
-              <span className="arrow">›</span>
-            </div>
-            <div className="setting-row">
-              <img src="/img/105/lock.svg" alt="" className="row-icon" />
-              <span>Privacy Security</span>
-              <span className="arrow">›</span>
-            </div>
-            <div className="setting-row">
-              <img src="/img/105/help.svg" alt="" className="row-icon" />
-              <span>Help and Feedback</span>
-              <span className="arrow">›</span>
-            </div>
-            <div className="setting-row">
-              <img src="/img/105/about.svg" alt="" className="row-icon" />
-              <span>About us</span>
-              <span className="arrow">›</span>
-            </div>
+            {settingRows.map((row) => (
+              <div className="setting-row" key={row.title}>
+                <img src={row.icon} alt="" className="row-icon" />
+                <span>{row.title}</span>
+                <span className="arrow">&gt;</span>
+              </div>
+            ))}
           </div>
 
           {selectedAdvice && (
             <div className="advice-modal-overlay" onClick={() => setSelectedAdvice(null)}>
-              <div className="advice-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="advice-modal" onClick={(event) => event.stopPropagation()}>
                 <div className="advice-modal-header">
                   <div>
-                    <span className="advice-modal-emoji">{selectedAdvice.emoji}</span>
+                    <span className="advice-modal-emoji">{selectedAdvice.icon}</span>
                     <h3>{selectedAdvice.title}</h3>
                   </div>
-                  <button
-                    type="button"
-                    className="advice-modal-close"
-                    onClick={() => setSelectedAdvice(null)}
-                  >
-                    ×
+                  <button type="button" className="advice-modal-close" onClick={() => setSelectedAdvice(null)}>
+                    x
                   </button>
                 </div>
                 <div className="advice-modal-body">
-                  <div className="advice-modal-label">{selectedAdvice.contentTitle}</div>
-                  <p>{selectedAdvice.content}</p>
+                  <div className="advice-modal-label">{selectedAdvice.subtitle}</div>
+                  <p>{modalLoading ? 'Loading...' : modalContent}</p>
                 </div>
               </div>
             </div>

@@ -1,8 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
+import { API_BASE_URL } from './api';
 import './Dashboard.css';
 
 const iconBase = '/img/105';
+const FUZHOU_AMAP = '\u798F\u5DDE\u5E02';
+const CITY_SEARCH_ALIASES = {
+  fuzhou: FUZHOU_AMAP,
+  'fu zhou': FUZHOU_AMAP,
+  '\u798F\u5DDE': FUZHOU_AMAP,
+  '\u798F\u5DDE\u5E02': FUZHOU_AMAP,
+};
+
+const normalizeCityQuery = (value = '') => CITY_SEARCH_ALIASES[value.trim().toLowerCase()] || value.trim();
 
 function readStoredFavorites() {
   try {
@@ -11,6 +21,14 @@ function readStoredFavorites() {
   } catch {
     return [];
   }
+}
+
+const OPENWEATHER_TIMEOUT_MS = 120000;
+
+function fetchWithTimeout(url, timeoutMs = OPENWEATHER_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timeout));
 }
 
 function Dashboard() {
@@ -31,16 +49,16 @@ function Dashboard() {
 
   const getWindDir = (windDir) => {
     const map = {
-      东: 'E',
-      东南: 'SE',
-      南: 'S',
-      西南: 'SW',
-      西: 'W',
-      西北: 'NW',
-      北: 'N',
-      东北: 'NE',
+      '\u4E1C': 'E',
+      '\u4E1C\u5357': 'SE',
+      '\u5357': 'S',
+      '\u897F\u5357': 'SW',
+      '\u897F': 'W',
+      '\u897F\u5317': 'NW',
+      '\u5317': 'N',
+      '\u4E1C\u5317': 'NE',
     };
-    return map[windDir] || windDir;
+    return map[windDir] || windDir || 'N/A';
   };
 
   const getRainLevel = (val) => {
@@ -56,19 +74,131 @@ function Dashboard() {
   };
 
   const getWeatherIcon = (weatherText = '') => {
-    if (weatherText.includes('晴') || weatherText.toLowerCase().includes('sun')) return 'sunny.svg';
-    if (weatherText.includes('云') || weatherText.toLowerCase().includes('cloud')) return 'cloudy.svg';
-    if (weatherText.includes('阴') || weatherText.toLowerCase().includes('overcast')) return 'overcast.svg';
-    if (weatherText.includes('雨') || weatherText.toLowerCase().includes('rain')) return 'rain.svg';
+    const text = String(weatherText).toLowerCase();
+    if (text.includes('sun') || text.includes('clear') || text.includes('\u6674')) return 'sunny.svg';
+    if (text.includes('cloud') || text.includes('\u4E91')) return 'cloudy.svg';
+    if (text.includes('overcast') || text.includes('\u9634')) return 'overcast.svg';
+    if (text.includes('rain') || text.includes('\u96E8')) return 'rain.svg';
     return 'cloudy.svg';
+  };
+
+  const buildCurrentFromOpenWeather = (currentData, dailyData, fallbackCity) => {
+    const oneCallCurrent = dailyData?.current || {};
+    const firstDaily = dailyData?.daily?.[0] || {};
+    const rainChance = Math.round(Number(firstDaily.pop || 0) * 100);
+
+    return {
+      name: currentData.name || fallbackCity,
+      date: new Date().toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      }),
+      lunar: 'OpenWeather',
+      main: {
+        temp: Math.round(currentData.main?.temp ?? oneCallCurrent.temp ?? 0),
+        temp_min: Math.round(currentData.main?.temp_min ?? firstDaily.temp?.min ?? currentData.main?.temp ?? 0),
+        temp_max: Math.round(currentData.main?.temp_max ?? firstDaily.temp?.max ?? currentData.main?.temp ?? 0),
+        humidity: currentData.main?.humidity ?? oneCallCurrent.humidity ?? 0,
+        pressure: currentData.main?.pressure ?? oneCallCurrent.pressure ?? 0,
+      },
+      weather: [{ description: currentData.weather?.[0]?.description || oneCallCurrent.weather?.[0]?.description || 'Clear' }],
+      wind: {
+        speed: Math.round(currentData.wind?.speed ?? oneCallCurrent.wind_speed ?? 0),
+        direction: 'N/A',
+      },
+      uvi: Math.round(oneCallCurrent.uvi ?? 0),
+      rainChance,
+      coord: currentData.coord,
+    };
+  };
+
+  const buildForecastFromDaily = (daily = []) => daily.slice(0, 7).map((item) => ({
+    date: new Date((item.dt || Date.now() / 1000) * 1000).toISOString(),
+    daytemp: Math.round(item.temp?.max ?? item.temp?.day ?? 0),
+    nighttemp: Math.round(item.temp?.min ?? item.temp?.night ?? 0),
+    dayweather: item.weather?.[0]?.description || 'Clear',
+  }));
+
+  const buildForecastFromOpenWeather = (data) => (data.list || []).slice(0, 7).map((item) => ({
+    date: item.dt_txt || new Date((item.dt || Date.now() / 1000) * 1000).toISOString(),
+    daytemp: Math.round(item.main?.temp_max ?? item.main?.temp ?? 0),
+    nighttemp: Math.round(item.main?.temp_min ?? item.main?.temp ?? 0),
+    dayweather: item.weather?.[0]?.description || 'Clear',
+  }));
+
+  const fetchBackendWeather = async (cityName) => {
+    const currentRes = await fetchWithTimeout(`${API_BASE_URL}/api/weather/current?city=${encodeURIComponent(cityName)}`, OPENWEATHER_TIMEOUT_MS);
+    if (!currentRes.ok) throw new Error('OpenWeather current weather failed');
+    const currentData = await currentRes.json();
+
+    let dailyData = null;
+    if (currentData.coord?.lat && currentData.coord?.lon) {
+      const dailyRes = await fetchWithTimeout(
+        `${API_BASE_URL}/api/weather/daily?lat=${encodeURIComponent(currentData.coord.lat)}&lon=${encodeURIComponent(currentData.coord.lon)}`,
+        OPENWEATHER_TIMEOUT_MS
+      );
+      if (dailyRes.ok) dailyData = await dailyRes.json();
+    }
+
+    let forecastList = buildForecastFromDaily(dailyData?.daily || []);
+    if (forecastList.length === 0) {
+      const forecastRes = await fetchWithTimeout(`${API_BASE_URL}/api/weather/forecast?city=${encodeURIComponent(cityName)}`, OPENWEATHER_TIMEOUT_MS);
+      if (!forecastRes.ok) throw new Error('OpenWeather forecast failed');
+      forecastList = buildForecastFromOpenWeather(await forecastRes.json());
+    }
+
+    return {
+      current: buildCurrentFromOpenWeather(currentData, dailyData, cityName),
+      forecast: forecastList,
+    };
+  };
+
+  const fetchAmapWeather = async (cityName) => {
+    const searchCity = normalizeCityQuery(cityName);
+    const url = `https://restapi.amap.com/v3/weather/weatherInfo?city=${encodeURIComponent(searchCity)}&key=${API_KEY}&extensions=all&output=json`;
+    const res = await fetchWithTimeout(url, 8000);
+    const data = await res.json();
+
+    if (data.status !== '1' || !data.forecasts?.[0]) {
+      throw new Error(data.info || 'City not found');
+    }
+
+    const forecastList = data.forecasts[0].casts.slice(0, 7);
+    const today = forecastList[0];
+    const weatherCity = data.forecasts[0].city || cityName;
+
+    return {
+      current: {
+        name: weatherCity,
+        date: new Date().toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+        }),
+        lunar: 'Amap fallback',
+        main: {
+          temp: today.daytemp,
+          temp_min: today.nighttemp,
+          temp_max: today.daytemp,
+          humidity: today.dayhumidity || '--',
+          pressure: today.daypressure || '--',
+        },
+        weather: [{ description: today.dayweather }],
+        wind: {
+          speed: today.daypower,
+          direction: getWindDir(today.daywind),
+        },
+        uvi: today.dayuv || '--',
+        rainChance: today.dayprecip || '--',
+        coord: searchCity === FUZHOU_AMAP ? { lat: 26.08, lon: 119.3 } : null,
+      },
+      forecast: forecastList,
+    };
   };
 
   const fetchWeather = async () => {
     const trimmedCity = city.trim();
-    if (!API_KEY) {
-      alert('API Key missing');
-      return;
-    }
     if (!trimmedCity) {
       alert('Please enter a city name.');
       return;
@@ -76,43 +206,28 @@ function Dashboard() {
 
     setLoading(true);
     try {
-      const url = `https://restapi.amap.com/v3/weather/weatherInfo?city=${encodeURIComponent(trimmedCity)}&key=${API_KEY}&extensions=all&output=json`;
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (data.status !== '1' || !data.forecasts?.[0]) {
-        throw new Error(data.info || 'City not found');
+      let result;
+      try {
+        result = await fetchBackendWeather(trimmedCity);
+      } catch {
+        if (!API_KEY) throw new Error('OpenWeather failed and Amap API key is missing');
+        result = await fetchAmapWeather(trimmedCity);
       }
 
-      const forecastList = data.forecasts[0].casts.slice(0, 5);
-      const today = forecastList[0];
-      const weatherCity = data.forecasts[0].city || trimmedCity;
-
-      setCurrentWeather({
-        name: weatherCity,
-        date: new Date().toLocaleDateString('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric',
-        }),
-        lunar: 'Lunar Feb 24',
-        main: {
-          temp: today.daytemp,
-          temp_min: today.nighttemp,
-          temp_max: today.daytemp,
-          humidity: today.dayhumidity || 0,
-          pressure: today.daypressure || 0,
+      setCurrentWeather(result.current);
+      setForecast(result.forecast);
+      localStorage.setItem('currentWeatherContext', JSON.stringify({
+        city: result.current.name,
+        lat: result.current.coord?.lat || 26.08,
+        lon: result.current.coord?.lon || 119.3,
+        weather: {
+          temp: Number(result.current.main.temp),
+          description: result.current.weather[0].description,
+          humidity: Number(result.current.main.humidity) || 0,
+          windSpeed: Number(result.current.wind.speed) || 0,
+          uvi: Number(result.current.uvi) || 0,
         },
-        weather: [{ description: today.dayweather }],
-        wind: {
-          speed: today.daypower,
-          direction: getWindDir(today.daywind),
-        },
-        uvi: today.dayuv || 0,
-        rainChance: today.dayprecip || 0,
-      });
-
-      setForecast(forecastList);
+      }));
     } catch (err) {
       alert(`Failed to fetch weather: ${err.message}`);
     } finally {
@@ -175,21 +290,21 @@ function Dashboard() {
 
                 <div className="temp-block">
                   <span className="big-temp">{currentWeather.main.temp}</span>
-                  <span className="unit">°C</span>
+                  <span className="unit">deg C</span>
                   <span className="weather-desc">{currentWeather.weather[0].description}</span>
                   <div className="temp-range">
-                    {currentWeather.main.temp_min}/{currentWeather.main.temp_max}°C | {currentWeather.wind.direction} wind
+                    {currentWeather.main.temp_min}/{currentWeather.main.temp_max} deg C | {currentWeather.wind.direction} wind
                   </div>
                 </div>
 
                 <div className="stats-row">
                   <div className="stat-item">
                     <img src={`${iconBase}/%E6%B9%BF%E5%BA%A6%201.svg`} alt="humidity" className="icon-sm" />
-                    <span>{currentWeather.main.humidity}%</span>
+                    <span>{currentWeather.main.humidity}{currentWeather.main.humidity === '--' ? '' : '%'}</span>
                   </div>
                   <div className="stat-item">
-                    <img src={`${iconBase}/air.svg`} alt="air" className="icon-sm" />
-                    <span>Excellent</span>
+                    <img src={`${iconBase}/air.svg`} alt="pressure" className="icon-sm" />
+                    <span>{currentWeather.main.pressure}{currentWeather.main.pressure === '--' ? '' : ' hPa'}</span>
                   </div>
                   <div className="stat-item">
                     <img src={`${iconBase}/%E9%A3%8E%E7%BA%A7%201.svg`} alt="wind" className="icon-sm" />
@@ -215,20 +330,20 @@ function Dashboard() {
                 <div className="data-card">
                   <h3>Rain Chance</h3>
                   <p>Today rain chance</p>
-                  <p className="card-value">{currentWeather.rainChance}%</p>
+                  <p className="card-value">{currentWeather.rainChance}{currentWeather.rainChance === '--' ? '' : '%'}</p>
                   <div className="simple-ring">
-                    <div className="ring-progress rain" style={{ '--percent': `${currentWeather.rainChance}%` }}>
-                      <span className="ring-text">{getRainLevel(currentWeather.rainChance)}</span>
+                    <div className="ring-progress rain" style={{ '--percent': `${Number(currentWeather.rainChance) || 0}%` }}>
+                      <span className="ring-text">{currentWeather.rainChance === '--' ? 'N/A' : getRainLevel(Number(currentWeather.rainChance))}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="data-card">
-                  <h3>Presssure</h3>
-                  <p>Today Pressure</p>
-                  <p className="card-value">{currentWeather.main.pressure} hPa</p>
+                  <h3>Pressure</h3>
+                  <p>Today pressure</p>
+                  <p className="card-value">{currentWeather.main.pressure}{currentWeather.main.pressure === '--' ? '' : ' hPa'}</p>
                   <div className="simple-ring">
-                    <div className="ring-progress pressure" style={{ '--percent': `${Math.min(((currentWeather.main.pressure - 1000) / 50) * 100, 100)}%` }} />
+                    <div className="ring-progress pressure" style={{ '--percent': `${Math.min(((Number(currentWeather.main.pressure) - 1000) / 50) * 100 || 0, 100)}%` }} />
                   </div>
                 </div>
 
@@ -237,7 +352,7 @@ function Dashboard() {
                   <p>Today UV Index</p>
                   <p className="card-value">{currentWeather.uvi}</p>
                   <div className="uv-rainbow-ring">
-                    <span className="ring-text">{getUvLevel(currentWeather.uvi)}</span>
+                    <span className="ring-text">{currentWeather.uvi === '--' ? 'N/A' : getUvLevel(Number(currentWeather.uvi))}</span>
                   </div>
                 </div>
               </div>
@@ -245,10 +360,10 @@ function Dashboard() {
 
             <div className="right-forecast">
               <div className="forecast-header">
-                <h2>Multi day forecast</h2>
+                <h2>7-day forecast</h2>
               </div>
               <div className="forecast-list">
-                {forecast?.map((item, idx) => (
+                {forecast?.slice(0, 7).map((item, idx) => (
                   <div key={idx} className="forecast-item">
                     <div className="forecast-date">
                       {new Date(item.date).toLocaleDateString('en-US', {
@@ -258,7 +373,7 @@ function Dashboard() {
                       })}
                     </div>
                     <div className="forecast-temp-row">
-                      <span>{item.daytemp}°C</span>
+                      <span>{item.daytemp} deg C</span>
                       <img
                         src={`${iconBase}/${getWeatherIcon(item.dayweather)}`}
                         alt={item.dayweather}
