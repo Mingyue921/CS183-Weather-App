@@ -68,7 +68,7 @@ router.get('/daily', async (req, res) => {
 
     res.json({
       current: data.current,
-      daily: (data.daily || []).slice(0, 7),
+      daily: (data.daily || []).slice(0, 8),
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch daily weather data' });

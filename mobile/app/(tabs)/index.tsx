@@ -13,7 +13,6 @@ import { SOLAR_TERM_DETAILS } from '../../constants/solarTermDetails';
 // 🔑 全局配置 (自动读取根目录 .env 文件)
 // ==========================================
 const API_KEYS = {
-  OPENWEATHER: process.env.EXPO_PUBLIC_WEATHER_API_KEY,
   AMAP: process.env.EXPO_PUBLIC_GAODE_API_KEY
 };
 
@@ -377,20 +376,19 @@ export default function WeatherApp() {
       setWeatherLoading(true);
       setWeatherError('');
       try {
-        const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${globalLocation.lat}&lon=${globalLocation.lon}&appid=${API_KEYS.OPENWEATHER}&units=metric&lang=en`;
-        const data = await fetchJson(url);
+        const data = await apiRequest(`/api/weather/daily?lat=${encodeURIComponent(globalLocation.lat)}&lon=${encodeURIComponent(globalLocation.lon)}`);
         setWeatherData(data);
-        setWeatherSource('OpenWeather');
+        setWeatherSource('OpenWeather via backend');
       } catch (e) {
         if (isAbortError(e)) {
-          console.warn("OpenWeather request was interrupted; Amap fallback was not used", e);
-          setWeatherError('OpenWeather request was interrupted. Please refresh or check the network.');
+          console.warn("Backend OpenWeather request was interrupted; Amap fallback was not used", e);
+          setWeatherError('Backend OpenWeather request was interrupted. Please refresh or check the network.');
           setWeatherSource('');
           setWeatherLoading(false);
           return;
         }
 
-        console.warn("OpenWeather failed, using Amap fallback", e);
+        console.warn("Backend OpenWeather failed, using Amap fallback", e);
         try {
           const fallbackData = await fetchAmapWeather();
           setWeatherData(fallbackData);
