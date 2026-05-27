@@ -53,16 +53,18 @@ router.post('/', async (req, res) => {
 // DELETE /api/favorites/:city — 删除收藏城市
 router.delete('/:city', async (req, res) => {
   try {
+    const cityName = decodeURIComponent(req.params.city);
+
     if (req.user.local || !req.app.locals.dbReady) {
       const user = await localUsers.findById(req.user.id);
       if (!user) return res.status(404).json({ error: '用户不存在' });
-      user.favorites = user.favorites.filter(c => (c.name || c) !== req.params.city);
+      user.favorites = user.favorites.filter(c => (c.name || c) !== cityName);
       const updated = await localUsers.updateUser(req.user.id, { favorites: user.favorites });
       return res.json({ message: '已取消收藏', favorites: updated.favorites });
     }
 
     const user = await User.findById(req.user.id);
-    user.favorites = user.favorites.filter(c => c !== req.params.city);
+    user.favorites = user.favorites.filter(c => c !== cityName);
     await user.save();
     res.json({ message: '已取消收藏', favorites: user.favorites });
   } catch {
