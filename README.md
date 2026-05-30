@@ -1,95 +1,95 @@
-# CS183-天气应用
+# CS183 Weather App
 
-结合 AI 智能建议与中国传统文化内容的天气应用，提供实时天气信息、AI 生成的生活推荐以及二十四节气文化卡片。
+A weather application combining AI-powered suggestions with traditional Chinese cultural content. Provides real-time weather information, AI-generated lifestyle recommendations, and 24 Solar Terms cultural cards.
 
-## 功能特性
+## Features
 
-* 实时天气展示（温度、湿度、风力、紫外线、空气质量、7 日预报）
-* AI 智能建议（穿衣、饮食、活动推荐 + 自由对话）
-* 二十四节气文化卡片，融入中国传统元素
-* 离线兜底 — AI 服务不可达时降级为规则引擎推荐；MongoDB 不可达时自动回退本地 JSON 存储
-* 用户注册/登录（JWT + bcrypt）
-* 收藏并管理常用城市
-* 响应式设计，适配桌面与移动端
-* 设置页面（单位切换、主题定制）
-* 内置 API 诊断工具
+* Real-time weather display (temperature, humidity, wind, UV, air quality, 7-day forecast)
+* AI-powered suggestions (clothing, food, activities + free-form chat)
+* 24 Solar Terms (二十四节气) cultural cards with traditional Chinese elements
+* Offline fallback — rules-based engine when AI is unreachable; local JSON storage when MongoDB is unavailable
+* User registration & login (JWT + bcrypt)
+* Save and manage favorite locations
+* Responsive design for desktop and mobile
+* Settings page (unit toggle, theme customization)
+* Built-in API diagnostic tool
 
-## 项目结构
+## Project Structure
 
     CS183-Weather-App/
-    ├── web/          # React.js Web 前端
-    ├── mobile/       # React Native (Expo) 移动端
-    ├── sever/        # Node.js/Express 后端
-    ├── AI/           # AI 微服务
+    ├── web/          # React.js web frontend
+    ├── mobile/       # React Native (Expo) mobile app
+    ├── sever/        # Node.js/Express backend
+    ├── AI/           # AI microservice
     ├── Dockerfile
     └── package.json
 
-## 技术栈
+## Tech Stack
 
-| 层级  | 技术  |
+| Layer | Technology |
 | --- | --- |
-| Web 前端 | React.js, CSS3 |
-| 移动端 | React Native (Expo SDK 55) |
-| 后端  | Node.js, Express, MongoDB / Mongoose |
-| 认证  | JWT + bcryptjs |
-| AI  | DeepSeek API + 规则引擎兜底离线处理 |
-| 天气数据 | OpenWeatherMap API |
-| 地理编码 | 高德地图 geocoding API |
-| 测试  | Jest |
-| 运维  | Docker |
+| Web Frontend | React.js, CSS3 |
+| Mobile App | React Native (Expo SDK 55) |
+| Backend | Node.js, Express, MongoDB / Mongoose |
+| Auth | JWT + bcryptjs |
+| AI  | DeepSeek API + rules-based fallback |
+| Weather Data | OpenWeatherMap API |
+| Geo | Amap (高德地图) geocoding API |
+| Testing | Jest |
+| DevOps | Docker |
 
-## Web 前端 (`web/`)
+## Web Frontend (`web/`)
 
-基于 React.js 的单页应用，页面结构：
+React.js single-page application with the following pages:
 
-* **Dashboard** — 天气总览：实时温度、湿度、风力、UV、空气质量 + AI 穿衣/饮食/活动建议卡片
-* **Calendar** — 二十四节气历：展示节气日期、物候描述，点击展开详情
-* **AI Helper** — 对话面板：自由输入天气相关问题，AI 实时回复
-* **Saved Locations** — 城市收藏：搜索城市 → 添加收藏 → 切换查看天气
-* **Settings** — 偏好设置：温度单位（°C/°F）、主题配色、区域管理
-* **Login** — 注册/登录页面，登录后解锁收藏等需要认证的功能
+* **Dashboard** — weather overview: real-time temperature, humidity, wind, UV, air quality + AI suggestion cards (clothing, food, activities)
+* **Calendar** — 24 Solar Terms calendar with term dates and descriptions, tap to expand details
+* **AI Helper** — chat panel for asking weather-related questions with real-time AI responses
+* **Saved Locations** — city favorites: search → add → switch to view weather
+* **Settings** — preferences: temperature unit (°C/°F), theme color, region management
+* **Login** — registration & login page; authentication required for favorites and saved data
 
-### 环境变量
+### Environment Variables
 
     REACT_APP_WEATHER_KEY=your_openweathermap_api_key
-    REACT_APP_API_BASE_URL=http://localhost:3000    # 可选，默认值
+    REACT_APP_API_BASE_URL=http://localhost:3000    # optional, defaults to this value
 
-### 启动
+### Running
 
     cd web
     npm install
     npm start
 
-## 移动端 (`mobile/`)
+## Mobile App (`mobile/`)
 
-基于 Expo 的 React Native 应用，使用 `expo-router` 文件路由，与 Web 端功能对齐。
+React Native app built with Expo, using `expo-router` for file-based routing. Feature parity with the web version.
 
-依赖包括：`@react-navigation`（底部标签 + 堆栈导航）、`expo-haptics`（触觉反馈）、`expo-image`（图片加载）、`react-native-gesture-handler`、`react-native-reanimated`（动画）、`react-native-svg`（矢量图形）等。
+Key dependencies: `@react-navigation` (bottom tabs + stack), `expo-haptics`, `expo-image`, `react-native-gesture-handler`, `react-native-reanimated`, `react-native-svg`.
 
-### 启动
+### Running
 
     cd mobile
     npm install
     npx expo start
 
-支持 Android 模拟器 / iOS 模拟器 / Expo Go 扫码运行。
+Supports Android emulator / iOS simulator / Expo Go QR scan.
 
-## 后端服务 (`sever/`)
+## Backend Server (`sever/`)
 
-Node.js/Express 服务，端口 3000。MongoDB 为主数据库，连接失败时自动回退到本地 JSON 文件存储。
+Node.js/Express server on port 3000. MongoDB is the primary database; falls back to local JSON file storage when MongoDB is unavailable.
 
-### 源代码结构
+### Source Structure
 
     sever/src/
-    ├── index.js          # 服务入口，挂载路由，连接 MongoDB
+    ├── index.js          # Server entry point, mounts routes, connects to MongoDB
     ├── routes/           # weather | solar-term | auth | favorites | ai | ai-suggestions
-    ├── models/           # Mongoose 数据模型
-    ├── middleware/       # JWT 认证 & 请求验证
-    ├── data/             # 种子数据 & 本地 JSON 存储文件
-    ├── localUserStore.js # JSON 文件用户 CRUD（bcrypt 哈希、自增 ID、邮箱查重）
-    └── localAiStore.js   # AI 响应文件缓存（上限 200 条）
+    ├── models/           # Mongoose data models
+    ├── middleware/        # JWT auth & request validation
+    ├── data/             # Seed data & local JSON storage files
+    ├── localUserStore.js # JSON file user CRUD (bcrypt hashing, auto-increment ID, email dedup)
+    └── localAiStore.js   # AI response file cache (max 200 entries)
 
-### 环境变量
+### Environment Variables
 
     PORT=3000
     MONGODB_URI=mongodb://localhost:27017/weather-app
@@ -97,116 +97,116 @@ Node.js/Express 服务，端口 3000。MongoDB 为主数据库，连接失败时
     WEATHER_API_KEY=your_openweathermap_api_key
     AI_SERVICE_BASE_URL=http://localhost:3001
 
-### API 端点
+### API Endpoints
 
-| 端点  | 说明  |
+| Endpoint | Description |
 | --- | --- |
-| /api/weather | 天气数据（实时、预报） |
-| /api/solar-term | 二十四节气查询 |
-| /api/auth | 用户注册/登录（JWT） |
-| /api/favorites | 收藏城市管理（需认证） |
-| /api/ai | AI 聊天代理 |
-| /api/ai-suggestions | AI 生活建议代理 |
-| /api/health | 服务健康检查 |
+| /api/weather | Weather data (current & forecast) |
+| /api/solar-term | 24 Solar Terms lookup |
+| /api/auth | User registration & login (JWT) |
+| /api/favorites | Favorite locations (auth required) |
+| /api/ai | AI chat proxy |
+| /api/ai-suggestions | AI lifestyle suggestions proxy |
+| /api/health | Service health check |
 
-### 启动
+### Running
 
     cd sever
     npm install
-    npm run dev    # 开发模式（自动重载）
+    npm run dev    # Development with auto-reload
 
-## AI 服务 (`AI/`)
+## AI Service (`AI/`)
 
-独立微服务，端口 3001。接收天气数据，调用 DeepSeek 生成穿衣/饮食/活动建议。AI 不可达时通过规则引擎兜底。
+Standalone microservice on port 3001. Receives weather data and calls DeepSeek to generate clothing, food, and activity recommendations. Falls back to a rules engine when the AI API is unreachable.
 
-### 源代码结构
+### Source Structure
 
     AI/
-    ├── diagnose.js          # API 连通性诊断脚本
+    ├── diagnose.js          # API connectivity diagnostic script
     └── src/
         └── ai/
-            ├── routes/      # aiAdvice（结构化建议）、aiChat（自由对话）
+            ├── routes/      # aiAdvice (structured suggestions), aiChat (free-form chat)
             ├── services/    # deepseek | openweather | amap | cache | fallbackEngine
             │                # layersEngine | foodEngine | activityEngine
-            |                # | solarTerm | weatherResponse
-            ├── data/        # OWM 天气代码 ↔ 中文标签映射表
-            └── __tests__/   # 引擎单元测试 + 集成测试
+            │                # solarTerm | weatherResponse
+            ├── data/        # OWM weather code → Chinese label mapping table
+            └── __tests__/   # Engine unit tests + integration tests
 
-### 关键机制
+### Key Mechanisms
 
-| 机制  | 实现  |
+| Mechanism | Implementation |
 | --- | --- |
-| AI 建议 | DeepSeek API，prompt 中注入完整天气上下文 |
-| 离线兜底 | `fallbackEngine.js` — 根据温度/天气代码匹配规则建议，标记 `source: local` |
-| 缓存  | `cache.js`（Map + 5 分钟 TTL）+ 后端 `localAiStore.js`（文件持久化） |
-| 诊断  | `diagnose.js` — 依次检测高德、OpenWeather、DeepSeek 的 Key 与连通性 |
+| AI Suggestions | DeepSeek API with full weather context injected in the prompt |
+| Offline Fallback | `fallbackEngine.js` — matches temperature/weather code to rules, marks `source: local` |
+| Caching | `cache.js` (Map + 5 min TTL) + backend `localAiStore.js` (file persistence) |
+| Diagnostics | `diagnose.js` — sequentially tests Amap, OpenWeather, and DeepSeek keys & connectivity |
 
-### 启动
+### Running
 
     cd AI
     npm install
-    npm start      # 默认端口 3001
-    node diagnose.js   # 验证 API 连接
-    npm test           # 运行测试
+    npm start           # Default port 3001
+    node diagnose.js    # Verify API connectivity
+    npm test            # Run tests
 
 ## Docker
 
     docker build -t weather-app .
     docker run -p 3000:3000 --env-file sever/.env weather-app
 
-## 快速开始
+## Getting Started
 
-### 1. 克隆仓库
+### 1. Clone the Repository
 
     git clone https://github.com/Mingyue921/CS183-Weather-App.git
     cd CS183-Weather-App
 
-### 2. 配置并启动 AI 服务
+### 2. Set Up & Start AI Service
 
     cd AI
     npm install
 
-配置环境变量（如需自定义 DeepSeek Key 等），然后：
+Configure environment variables if needed (e.g., custom DeepSeek key), then:
 
-    npm start       # 默认端口 3001
+    npm start       # Default port 3001
 
-### 3. 配置并启动后端
+### 3. Set Up & Start Backend
 
     cd sever
     npm install
     cp .env.example .env
 
-编辑 `.env`，填入你的 OpenWeather API Key、JWT Secret 和 MongoDB 连接地址，然后：
+Edit `.env` with your OpenWeather API key, JWT secret, and MongoDB URI, then:
 
-    npm run dev     # 开发模式（自动重载）
+    npm run dev     # Development with auto-reload
 
-### 4. 配置并启动 Web 前端
+### 4. Set Up & Start Web Frontend
 
     cd web
     npm install
     cp .env.example .env
 
-编辑 `.env` 填入 `REACT_APP_WEATHER_KEY`，然后：
+Edit `.env` and set `REACT_APP_WEATHER_KEY`, then:
 
     npm start
 
-### 5. 配置并启动移动端
+### 5. Set Up & Start Mobile App
 
     cd mobile
     npm install
     npx expo start
 
-## UI 设计
+## UI Design
 
-* **风格**：柔和、宁静、极简
-* **配色**：低饱和度莫兰迪色系 — 柔白、浅灰蓝、暖琥珀点缀
-* **主题**：现代 UI 融合中国传统元素
-* **设计工具**：Figma
+* **Style**: Soft, calming, and minimal
+* **Color Palette**: Low-saturation Morandi tones — soft white, light gray-blue, warm amber accents
+* **Theme**: Fusion of modern UI design with traditional Chinese cultural elements
+* **Design Tool**: Figma
 
-## 贡献
+## Contributing
 
-本项目为 CS183 课程作业，欢迎通过 GitHub Issues / Pull Requests 反馈。
+This project was developed for CS183 coursework. Feedback and contributions are welcome via GitHub Issues and Pull Requests.
 
-## 许可证
+## License
 
-仅用于教育目的。
+For educational purposes only.
