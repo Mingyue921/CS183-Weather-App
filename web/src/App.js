@@ -10,24 +10,29 @@ import Setting from './Setting';
 import { apiRequest } from './api';
 
 function App() {
-  const [isLogin, setIsLogin] = useState(() => Boolean(localStorage.getItem('token')));
+  const [isLogin, setIsLogin] = useState(() => !!localStorage.getItem('token'));
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const restoreSession = async () => {
       const token = localStorage.getItem('token');
-      if (!token) return;
-
+      if (!token) {
+        setIsLogin(false);
+        setUser(null);
+        return;
+      }
       try {
         const data = await apiRequest('/api/auth/me');
         localStorage.setItem('currentUser', JSON.stringify(data.user));
+        setUser(data.user);
         setIsLogin(true);
       } catch {
         localStorage.removeItem('token');
         localStorage.removeItem('currentUser');
         setIsLogin(false);
+        setUser(null);
       }
     };
-
     restoreSession();
   }, []);
 
@@ -35,33 +40,35 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('currentUser');
     setIsLogin(false);
+    setUser(null);
   };
 
   return (
     <Router>
-      {/* 用空标签 <> 包裹整个判断，解决JSX语法错误 */}
-      <>
-        {!isLogin ? (
+      <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
+        {/* 关键：把 isLogin 和 user 传给 Sidebar */}
+        <Sidebar
+          isLogin={isLogin}
+          user={user}
+          onLogout={handleLogout}
+        />
+        <div style={{ flex: 1, overflow: 'auto' }}>
           <Routes>
-            <Route path="/login" element={<Login setIsLogin={setIsLogin} />} />
-            <Route path="*" element={<Navigate to="/login" />} />
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/aihelper" element={<AiHelper />} />
+            <Route path="/savedlocation" element={<SavedLocation />} />
+            <Route path="/calendar" element={<Calendar />} />
+            {/* 关键：把 isLogin 和 user 传给 Setting */}
+            <Route
+              path="/setting"
+              element={<Setting isLogin={isLogin} user={user} />}
+            />
+            {/* 关键：把 setIsLogin 和 setUser 传给 Login */}
+            <Route path="/login" element={<Login setIsLogin={setIsLogin} setUser={setUser} />} />
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
-        ) : (
-          <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
-            <Sidebar onLogout={handleLogout} style={{ width: '240px', flexShrink: 0 }} />
-            <div style={{ flex: 1, overflow: 'auto' }}>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/aihelper" element={<AiHelper />} />
-                <Route path="/savedlocation" element={<SavedLocation />} />
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/setting" element={<Setting />} />
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
-            </div>
-          </div>
-        )}
-      </>
+        </div>
+      </div>
     </Router>
   );
 }

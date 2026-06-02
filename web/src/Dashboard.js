@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Sidebar from './Sidebar';
 import { API_BASE_URL } from './api';
 import './Dashboard.css';
 
@@ -31,10 +30,34 @@ function fetchWithTimeout(url, timeoutMs = OPENWEATHER_TIMEOUT_MS) {
   return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timeout));
 }
 
+function getAirQuality(value = 60) {
+  const humidity = Number(value);
+  if (humidity < 65) return 'good';
+  if (humidity < 82) return 'Excellent';
+  return 'normal';
+}
+
+function windDegToDirection(deg) {
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const index = Math.round(deg / 45) % 8;
+  return directions[index];
+}
+
 function Dashboard() {
-  const [city, setCity] = useState('');
-  const [currentWeather, setCurrentWeather] = useState(null);
-  const [forecast, setForecast] = useState(null);
+  const [city, setCity] = useState(() => {
+    return localStorage.getItem('lastSearchCity') || '';
+  });
+
+  const [currentWeather, setCurrentWeather] = useState(() => {
+    const saved = localStorage.getItem('lastCurrentWeather');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [forecast, setForecast] = useState(() => {
+    const saved = localStorage.getItem('lastForecast');
+    return saved ? JSON.parse(saved) : null;
+  });
+
   const [favorites, setFavorites] = useState(readStoredFavorites);
   const [loading, setLoading] = useState(false);
 
@@ -73,6 +96,13 @@ function Dashboard() {
     return 'High';
   };
 
+  const getPressureStatus = (press) => {
+    const p = Number(press);
+    if (p < 1000) return 'Low';
+    if (p > 1025) return 'High';
+    return 'Normal';
+  };
+
   const getWeatherIcon = (weatherText = '') => {
     const text = String(weatherText).toLowerCase();
     if (text.includes('sun') || text.includes('clear') || text.includes('\u6674')) return 'sunny.svg';
@@ -85,7 +115,16 @@ function Dashboard() {
   const buildCurrentFromOpenWeather = (currentData, dailyData, fallbackCity) => {
     const oneCallCurrent = dailyData?.current || {};
     const firstDaily = dailyData?.daily?.[0] || {};
-    const rainChance = Math.round(Number(firstDaily.pop || 0) * 100);
+
+    // ✅ 修复：三重兜底 + 强制转数字，永远不会 NaN
+    const rawRainChance = Number(firstDaily.pop || currentData.pop || currentData.clouds || 0);
+    const rainChance = isNaN(rawRainChance) ? 0 : Math.round(rawRainChance * 100);
+
+    let windDir = 'N/A';
+    const deg = currentData.windDeg ?? currentData.wind?.deg ?? oneCallCurrent.wind_deg;
+    if (typeof deg === 'number' && !isNaN(deg)) {
+      windDir = windDegToDirection(deg);
+    }
 
     return {
       name: currentData.name || fallbackCity,
@@ -105,7 +144,7 @@ function Dashboard() {
       weather: [{ description: currentData.weather?.[0]?.description || oneCallCurrent.weather?.[0]?.description || 'Clear' }],
       wind: {
         speed: Math.round(currentData.wind?.speed ?? oneCallCurrent.wind_speed ?? 0),
-        direction: 'N/A',
+        direction: windDir,
       },
       uvi: Math.round(oneCallCurrent.uvi ?? 0),
       rainChance,
@@ -161,12 +200,12 @@ function Dashboard() {
     const data = await res.json();
 
     if (data.status !== '1' || !data.forecasts?.[0]) {
-      throw new Error(data.info || 'City not found');
+      throw new Error('City not found in Amap API');
     }
 
     const forecastList = data.forecasts[0].casts.slice(0, 7);
     const today = forecastList[0];
-    const weatherCity = data.forecasts[0].city || cityName;
+    const weatherCity = cityName;
 
     return {
       current: {
@@ -190,7 +229,7 @@ function Dashboard() {
           direction: getWindDir(today.daywind),
         },
         uvi: today.dayuv || '--',
-        rainChance: today.dayprecip || '--',
+        rainChance: today.dayprecip || 0,
         coord: searchCity === FUZHOU_AMAP ? { lat: 26.08, lon: 119.3 } : null,
       },
       forecast: forecastList,
@@ -205,50 +244,45 @@ function Dashboard() {
     }
 
     setLoading(true);
+    let result;
     try {
-      let result;
-      try {
-        result = await fetchBackendWeather(trimmedCity);
-      } catch {
-        if (!API_KEY) throw new Error('OpenWeather failed and Amap API key is missing');
-        result = await fetchAmapWeather(trimmedCity);
+      result = await fetchBackendWeather(trimmedCity);
+    } catch (openWeatherErr) {
+      if (!API_KEY) {
+        alert('Failed to fetch weather from OpenWeather, and Amap API key is missing.');
+        setLoading(false);
+        return;
       }
-
-      setCurrentWeather(result.current);
-      setForecast(result.forecast);
-      localStorage.setItem('currentWeatherContext', JSON.stringify({
-        city: result.current.name,
-        lat: result.current.coord?.lat || 26.08,
-        lon: result.current.coord?.lon || 119.3,
-        weather: {
-          temp: Number(result.current.main.temp),
-          description: result.current.weather[0].description,
-          humidity: Number(result.current.main.humidity) || 0,
-          windSpeed: Number(result.current.wind.speed) || 0,
-          uvi: Number(result.current.uvi) || 0,
-        },
-      }));
-    } catch (err) {
-      alert(`Failed to fetch weather: ${err.message}`);
-    } finally {
-      setLoading(false);
+      try {
+        result = await fetchAmapWeather(trimmedCity);
+      } catch (amapErr) {
+        alert(`Failed to fetch weather for "${trimmedCity}". Please check the city name.`);
+        setLoading(false);
+        return;
+      }
     }
+
+    setCurrentWeather(result.current);
+    setForecast(result.forecast);
+
+    localStorage.setItem('lastSearchCity', trimmedCity);
+    localStorage.setItem('lastCurrentWeather', JSON.stringify(result.current));
+    localStorage.setItem('lastForecast', JSON.stringify(result.forecast));
+
+    setLoading(false);
   };
 
   const toggleFavorite = () => {
     if (!favoriteCity) return;
-
-    setFavorites((current) => {
-      if (current.includes(favoriteCity)) {
-        return current.filter((item) => item !== favoriteCity);
-      }
-      return [...current, favoriteCity];
-    });
+    setFavorites((current) =>
+      current.includes(favoriteCity)
+        ? current.filter((item) => item !== favoriteCity)
+        : [...current, favoriteCity]
+    );
   };
 
   return (
     <div className="app-container">
-      <Sidebar />
       <div className="main-content">
         <div className="search-bar">
           <input
@@ -267,7 +301,6 @@ function Dashboard() {
             className={`favorite-toggle ${isFavorite ? 'active' : ''}`}
             onClick={toggleFavorite}
             disabled={!currentWeather}
-            aria-label={isFavorite ? 'Remove from saved locations' : 'Save location'}
           >
             {isFavorite ? '\u2665' : '\u2661'}
           </button>
@@ -303,8 +336,8 @@ function Dashboard() {
                     <span>{currentWeather.main.humidity}{currentWeather.main.humidity === '--' ? '' : '%'}</span>
                   </div>
                   <div className="stat-item">
-                    <img src={`${iconBase}/air.svg`} alt="pressure" className="icon-sm" />
-                    <span>{currentWeather.main.pressure}{currentWeather.main.pressure === '--' ? '' : ' hPa'}</span>
+                    <img src={`${iconBase}/air.svg`} alt="air quality" className="icon-sm" />
+                    <span>{getAirQuality(currentWeather.main.humidity)}</span>
                   </div>
                   <div className="stat-item">
                     <img src={`${iconBase}/%E9%A3%8E%E7%BA%A7%201.svg`} alt="wind" className="icon-sm" />
@@ -321,7 +354,7 @@ function Dashboard() {
                   <p>Today wind speed</p>
                   <p className="card-value">{currentWeather.wind.speed} km/h</p>
                   <div className="simple-ring">
-                    <div className="ring-progress wind" style={{ '--percent': `${Math.min(Number(currentWeather.wind.speed) / 12 * 100, 100)}%` }}>
+                    <div className="ring-progress wind" style={{ '--percent': Math.min(100, Number(currentWeather.wind.speed) / 12 * 100) + '%' }}>
                       <span className="ring-text">{currentWeather.wind.direction}</span>
                     </div>
                   </div>
@@ -330,10 +363,21 @@ function Dashboard() {
                 <div className="data-card">
                   <h3>Rain Chance</h3>
                   <p>Today rain chance</p>
-                  <p className="card-value">{currentWeather.rainChance}{currentWeather.rainChance === '--' ? '' : '%'}</p>
+                  <p className="card-value">
+                    {isNaN(currentWeather.rainChance) ? 0 : currentWeather.rainChance}%
+                  </p>
                   <div className="simple-ring">
-                    <div className="ring-progress rain" style={{ '--percent': `${Number(currentWeather.rainChance) || 0}%` }}>
-                      <span className="ring-text">{currentWeather.rainChance === '--' ? 'N/A' : getRainLevel(Number(currentWeather.rainChance))}</span>
+                    <div 
+                      className="ring-progress rain" 
+                      style={{ 
+                        '--percent': `${isNaN(currentWeather.rainChance) ? 0 : currentWeather.rainChance}%` 
+                      }}
+                    >
+                      <span className="ring-text">
+                        {currentWeather.rainChance === '--' || isNaN(currentWeather.rainChance)
+                          ? 'N/A'
+                          : getRainLevel(Number(currentWeather.rainChance))}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -343,7 +387,16 @@ function Dashboard() {
                   <p>Today pressure</p>
                   <p className="card-value">{currentWeather.main.pressure}{currentWeather.main.pressure === '--' ? '' : ' hPa'}</p>
                   <div className="simple-ring">
-                    <div className="ring-progress pressure" style={{ '--percent': `${Math.min(((Number(currentWeather.main.pressure) - 1000) / 50) * 100 || 0, 100)}%` }} />
+                    <div 
+                      className="ring-progress pressure" 
+                      style={{
+                        '--percent': Math.max(0, Math.min(100, ((Number(currentWeather.main.pressure) - 980) / 60) * 100)) + "%"
+                      }}
+                    >
+                      <span className="ring-text">
+                        {currentWeather.main.pressure === '--' ? 'N/A' : getPressureStatus(currentWeather.main.pressure)}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -366,19 +419,11 @@ function Dashboard() {
                 {forecast?.slice(0, 7).map((item, idx) => (
                   <div key={idx} className="forecast-item">
                     <div className="forecast-date">
-                      {new Date(item.date).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
+                      {new Date(item.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </div>
                     <div className="forecast-temp-row">
                       <span>{item.daytemp} deg C</span>
-                      <img
-                        src={`${iconBase}/${getWeatherIcon(item.dayweather)}`}
-                        alt={item.dayweather}
-                        className="forecast-icon"
-                      />
+                      <img src={`${iconBase}/${getWeatherIcon(item.dayweather)}`} alt="" className="forecast-icon" />
                     </div>
                   </div>
                 ))}
@@ -387,7 +432,7 @@ function Dashboard() {
           </div>
         ) : (
           <div className="empty-state">
-            <img src={`${iconBase}/picture.svg`} alt="empty" className="empty-img" />
+            <img src={`${iconBase}/picture.svg`} alt="" className="empty-img" />
             <p>Enter a city name to view weather data</p>
           </div>
         )}

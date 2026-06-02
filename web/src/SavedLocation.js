@@ -12,14 +12,23 @@ function SavedLocation() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
+  // 关键：监听收藏变化事件
   useEffect(() => {
-    loadFavorites();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const handleFavoritesChanged = () => {
+      const local = readLocalFavorites();
+      setFavorites(local);
+    };
+
+    window.addEventListener('weatherFavoritesChanged', handleFavoritesChanged);
+    handleFavoritesChanged();
+
+    return () => {
+      window.removeEventListener('weatherFavoritesChanged', handleFavoritesChanged);
+    };
   }, []);
 
+  // 收藏变化 → 自动刷新天气卡片
   useEffect(() => {
-    localStorage.setItem('weatherFavorites', JSON.stringify(favorites));
-    window.dispatchEvent(new Event('weatherFavoritesChanged'));
     if (favorites.length === 0) {
       setWeatherCards([]);
       return;
@@ -42,22 +51,6 @@ function SavedLocation() {
     };
   }, [favorites]);
 
-  const loadFavorites = async () => {
-    const localFavorites = readLocalFavorites();
-
-    try {
-      if (!localStorage.getItem('token')) {
-        setFavorites(localFavorites);
-        return;
-      }
-
-      const data = await apiRequest('/api/favorites');
-      setFavorites(normalizeFavorites(data.favorites));
-    } catch {
-      setFavorites(localFavorites);
-    }
-  };
-
   const addFavorite = async (event) => {
     event.preventDefault();
     const city = query.trim();
@@ -72,32 +65,16 @@ function SavedLocation() {
 
     const nextFavorites = uniqueCities([...favorites, card.city]);
     setFavorites(nextFavorites);
+    localStorage.setItem('weatherFavorites', JSON.stringify(nextFavorites));
+    window.dispatchEvent(new Event('weatherFavoritesChanged'));
     setQuery('');
-
-    if (localStorage.getItem('token')) {
-      try {
-        await apiRequest('/api/favorites', {
-          method: 'POST',
-          body: JSON.stringify({ city: card.city }),
-        });
-      } catch {
-        setMessage('Saved locally. Server sync is temporarily unavailable.');
-      }
-    }
   };
 
   const removeFavorite = async (city) => {
-    setFavorites((current) => current.filter((item) => item !== city));
-
-    if (localStorage.getItem('token')) {
-      try {
-        await apiRequest(`/api/favorites/${encodeURIComponent(city)}`, {
-          method: 'DELETE',
-        });
-      } catch {
-        setMessage('Removed locally. Server sync is temporarily unavailable.');
-      }
-    }
+    const newFavs = favorites.filter((item) => item !== city);
+    setFavorites(newFavs);
+    localStorage.setItem('weatherFavorites', JSON.stringify(newFavs));
+    window.dispatchEvent(new Event('weatherFavoritesChanged'));
   };
 
   return (
@@ -107,7 +84,7 @@ function SavedLocation() {
           <img src={`${iconBase}/search.svg`} alt="" />
           <input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => setQuery(event.value)}
             placeholder="Searching city here..."
           />
         </form>
@@ -175,7 +152,6 @@ function SavedLocation() {
 async function fetchCityWeather(city) {
   const backendWeather = await fetchBackendWeather(city);
   if (backendWeather) return backendWeather;
-
   return fetchAmapWeather(city);
 }
 

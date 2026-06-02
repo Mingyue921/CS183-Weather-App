@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import Sidebar from './Sidebar';
+import { useNavigate } from 'react-router-dom';
+//import Sidebar from './Sidebar';
 import { apiRequest } from './api';
 import './Setting.css';
 
@@ -55,25 +56,16 @@ function getWeatherContext() {
   }
 }
 
-export default function Setting() {
-  const [user, setUser] = useState(getStoredUser);
+export default function Setting({ isLogin, user }) {
+  const navigate = useNavigate();
   const [selectedAdvice, setSelectedAdvice] = useState(null);
   const [modalContent, setModalContent] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
 
-  useEffect(() => {
-    const loadUser = async () => {
-      if (!localStorage.getItem('token')) return;
-      try {
-        const data = await apiRequest('/api/auth/me');
-        setUser(data.user);
-        localStorage.setItem('currentUser', JSON.stringify(data.user));
-      } catch {
-        setUser(getStoredUser());
-      }
-    };
-    loadUser();
-  }, []);
+  // 未登录 → 显示默认值
+  const nickname = isLogin ? (user?.nickname || 'User') : 'Click to Log In';
+  const userId = isLogin ? (user?.id || '0000001') : '';
+  const email = isLogin ? (user?.email || 'No email available') : '';
 
   const openAdvice = async (item) => {
     const context = getWeatherContext();
@@ -110,28 +102,43 @@ export default function Setting() {
     }
   };
 
-  const nickname = user.nickname || 'Sunny Nuan';
-  const userId = user.id || '0000001';
-
   return (
     <div className="app-container">
-      <Sidebar />
       <div className="main-content">
         <div className="setting-page">
           <div className="page-header">
             <img src="/img/105/setting.svg" alt="setting" className="header-icon" />
             <div className="header-right">
               <img src="/img/105/bell.svg" alt="bell" className="header-icon" />
-              <img src="/img/105/avatar.svg" alt="avatar" className="avatar-icon" />
+              <img 
+                src="/img/105/avatar.svg" 
+                alt="avatar" 
+                className="avatar-icon" 
+              />
             </div>
           </div>
 
-          <div className="user-card">
-            <img src={user.avatarUrl || '/img/105/avatar.svg'} alt="user avatar" className="user-avatar" />
+          {/* 用户卡片：未登录点击跳登录 */}
+          <div 
+            className="user-card"
+            onClick={() => {
+              if (!isLogin) {
+                navigate('/login');
+              }
+            }}
+            style={{
+              cursor: isLogin ? 'default' : 'pointer'
+            }}
+          >
+            <img 
+              src={isLogin ? (user.avatarUrl || '/img/105/avatar.svg') : '/img/105/avatar.svg'} 
+              alt="user avatar" 
+              className="user-avatar" 
+            />
             <div className="user-info">
               <h2 className="user-name">{nickname}</h2>
-              <p className="user-id">ID: {userId}</p>
-              <p className="user-email">{user.email || 'No email available'}</p>
+              {userId && <p className="user-id">ID: {userId}</p>}
+              {email && <p className="user-email">{email}</p>}
             </div>
           </div>
 

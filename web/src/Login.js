@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { apiRequest } from './api';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
-export default function Login({ setIsLogin }) {
+// 关键：接收 setIsLogin 和 setUser 两个 props
+export default function Login({ setIsLogin, setUser }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
@@ -34,6 +37,8 @@ export default function Login({ setIsLogin }) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
       setIsLogin(true);
+      setUser(data.user); // 关键：登录成功后更新全局 user 状态
+      navigate('/');
     } catch (err) {
       alert(err.message || 'Authentication failed.');
     } finally {
