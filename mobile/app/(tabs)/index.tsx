@@ -13,7 +13,6 @@ import { SOLAR_TERM_DETAILS } from '../../constants/solarTermDetails';
 // 🔑 全局配置 (自动读取根目录 .env 文件)
 // ==========================================
 const API_KEYS = {
-  OPENWEATHER: process.env.EXPO_PUBLIC_WEATHER_API_KEY,
   AMAP: process.env.EXPO_PUBLIC_GAODE_API_KEY
 };
 
@@ -32,6 +31,8 @@ const ADVICE_TYPES: Record<string, string> = {
   activity: 'Activity Advice',
   diet: 'Food Advice',
 };
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
 const buildWeatherContext = (weatherData, location) => ({
   city: location?.name,
@@ -129,6 +130,44 @@ const isAbortError = (error: unknown) => (
 const toNumber = (value: unknown, fallback = 0) => {
   const numberValue = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
   return Number.isFinite(numberValue) ? numberValue : fallback;
+};
+
+const toAdviceItems = (text = '') => text
+  .split(/\n|,|;|、/)
+  .map(item => item.replace(/^[-•\s]+/, '').trim())
+  .filter(Boolean);
+
+const formatAdviceList = (items: string[]) => {
+  if (items.length <= 1) return items[0] || '';
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+};
+
+const polishAdviceReply = (text = '', type = '') => {
+  const trimmed = String(text || '').trim();
+  if (!trimmed) return 'No advice returned yet. Please try again later.';
+
+  const items = toAdviceItems(trimmed);
+  const alreadySentence = /[.!?]$/.test(trimmed) && items.length < 3;
+  if (alreadySentence) return trimmed;
+
+  if (items.length >= 3) {
+    const list = formatAdviceList(items);
+    if (type === 'diet') {
+      return `For today's weather, consider ${list}. Keep meals fresh and balanced, and choose a warm option if rain or wind makes the day feel cooler.`;
+    }
+    if (type === 'activity') {
+      return `Good choices for today include ${list}. Pick the lighter options if the weather feels humid, rainy, or too hot outside.`;
+    }
+    if (type === 'travel') {
+      return `For going out today, keep these points in mind: ${list}. Check the latest weather before leaving and adjust your route if conditions change.`;
+    }
+    if (type === 'clothing') {
+      return `A practical outfit today would be ${list}. Adjust layers based on the feels-like temperature and humidity.`;
+    }
+  }
+
+  return trimmed;
 };
 
 // 24节气大致日期对照表 (MM-DD)
@@ -377,20 +416,19 @@ export default function WeatherApp() {
       setWeatherLoading(true);
       setWeatherError('');
       try {
-        const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${globalLocation.lat}&lon=${globalLocation.lon}&appid=${API_KEYS.OPENWEATHER}&units=metric&lang=en`;
-        const data = await fetchJson(url);
+        const data = await apiRequest(`/api/weather/daily?lat=${encodeURIComponent(globalLocation.lat)}&lon=${encodeURIComponent(globalLocation.lon)}`);
         setWeatherData(data);
-        setWeatherSource('OpenWeather');
+        setWeatherSource('OpenWeather via backend');
       } catch (e) {
         if (isAbortError(e)) {
-          console.warn("OpenWeather request was interrupted; Amap fallback was not used", e);
-          setWeatherError('OpenWeather request was interrupted. Please refresh or check the network.');
+          console.warn("Backend OpenWeather request was interrupted; Amap fallback was not used", e);
+          setWeatherError('Backend OpenWeather request was interrupted. Please refresh or check the network.');
           setWeatherSource('');
           setWeatherLoading(false);
           return;
         }
 
-        console.warn("OpenWeather failed, using Amap fallback", e);
+        console.warn("Backend OpenWeather failed, using Amap fallback", e);
         try {
           const fallbackData = await fetchAmapWeather();
           setWeatherData(fallbackData);
@@ -1148,7 +1186,6 @@ function WeatherAlertsScreen({ navigate, location, returnTo }) {
 // ==========================================
 function AdviceDetailScreen({ navigate, type, weatherData, location }) {
   const [reply, setReply] = useState('');
-  const [rawAdvice, setRawAdvice] = useState(null);
   const [loading, setLoading] = useState(true);
   const title = ADVICE_TYPES[type] || 'AI Advice';
 
@@ -1161,11 +1198,9 @@ function AdviceDetailScreen({ navigate, type, weatherData, location }) {
           method: 'POST',
           body: JSON.stringify({ type, city: context.city, weather: context.weather }),
         });
-        setReply(data.reply);
-        setRawAdvice(data.raw || null);
+        setReply(polishAdviceReply(data.reply, type));
       } catch (error) {
         setReply(`Unable to connect to the AI service: ${error.message}`);
-        setRawAdvice(null);
       } finally {
         setLoading(false);
       }
@@ -1191,35 +1226,7 @@ function AdviceDetailScreen({ navigate, type, weatherData, location }) {
           {loading ? (
             <ActivityIndicator size="large" color={THEME.primary} />
           ) : (
-            <>
-              <Text style={styles.adviceText}>{reply}</Text>
-              {rawAdvice && (
-                <View style={styles.aiJsonBox}>
-                  <Text style={styles.aiJsonTitle}>AI Response Data</Text>
-                  {type === 'clothing' && (
-                    <>
-                      <Text style={styles.aiJsonLine}>Feels like: {rawAdvice.feelsLike ?? '--'}°</Text>
-                      <Text style={styles.aiJsonLine}>Humidity: {rawAdvice.humidity ?? '--'}%</Text>
-                      {(rawAdvice.clothingDetails || []).map((item, index) => <Text key={index} style={styles.aiJsonLine}>- {item}</Text>)}
-                    </>
-                  )}
-                  {type === 'travel' && (
-                    <>
-                      <Text style={styles.aiJsonLine}>UV: {rawAdvice.uv ? `${rawAdvice.uv.value} (${rawAdvice.uv.level})` : '--'}</Text>
-                      <Text style={styles.aiJsonLine}>Air Quality: {rawAdvice.airQuality ? `${rawAdvice.airQuality.level} AQI ${rawAdvice.airQuality.aqi}` : '--'}</Text>
-                      {(rawAdvice.outingWarnings || []).map((item, index) => <Text key={index} style={styles.aiJsonLine}>- {item}</Text>)}
-                    </>
-                  )}
-                  {type === 'activity' && (rawAdvice.activityAdvice || []).map((item, index) => <Text key={index} style={styles.aiJsonLine}>- {item}</Text>)}
-                  {type === 'diet' && (
-                    <>
-                      {(rawAdvice.foodAdvice || []).map((item, index) => <Text key={`food-${index}`} style={styles.aiJsonLine}>- {item}</Text>)}
-                      {(rawAdvice.foodDetails || []).map((item, index) => <Text key={`detail-${index}`} style={styles.aiJsonLine}>Note: {item}</Text>)}
-                    </>
-                  )}
-                </View>
-              )}
-            </>
+            <Text style={styles.adviceText}>{reply}</Text>
           )}
         </View>
       </ScrollView>
@@ -1239,8 +1246,13 @@ function AuthScreen({ navigate, setIsLogged, setCurrentUser }) {
   const [submitting, setSubmitting] = useState(false);
   
   const handleAuthAction = async () => {
-    if (!email || !password) {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail || !password) {
       Alert.alert('Notice', 'Please enter email and password');
+      return;
+    }
+    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+      Alert.alert('Invalid email', 'Please enter a valid email address, for example: name@example.com');
       return;
     }
     if (!isLoginMode && password !== confirmPassword) {
@@ -1253,7 +1265,7 @@ function AuthScreen({ navigate, setIsLogged, setCurrentUser }) {
       const data = await apiRequest(`/api/auth/${isLoginMode ? 'login' : 'register'}`, {
         method: 'POST',
         body: JSON.stringify({
-          email,
+          email: normalizedEmail,
           password,
           nickname: nickname || 'Sunny Nuan',
         }),
@@ -1279,7 +1291,7 @@ function AuthScreen({ navigate, setIsLogged, setCurrentUser }) {
           {isLoginMode ? 'Log in' : 'Sign up'}
         </Text>
         
-        <TextInput style={styles.authInput} placeholder="Email address" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
+        <TextInput style={styles.authInput} placeholder="Email address" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} autoComplete="email" keyboardType="email-address" />
         
         {!isLoginMode && <TextInput style={styles.authInput} placeholder="Nickname (default: Sunny Nuan)" value={nickname} onChangeText={setNickname} />}
         

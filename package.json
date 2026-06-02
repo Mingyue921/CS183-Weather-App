@@ -1,0 +1,8 @@
+{
+  "name": "cs183-weather-app",
+  "version": "1.0.0",
+  "scripts": {
+    "install": "cd sever && npm install",
+    "start": "node sever/src/index.js"
+  }
+}
