@@ -1,0 +1,188 @@
+ .dockerignore                                      |    3 [32m+[m
+ AI/.gitignore                                      |    3 [32m+[m
+ AI/SolarTerm.java                                  |   30 [31m-[m
+ AI/SolarTermMatcher.java                           |  104 [31m-[m
+ AI/diagnose.js                                     |   89 [32m+[m
+ AI/finalApp.java                                   |  133 [31m-[m
+ AI/jest.config.js                                  |    6 [32m+[m
+ AI/package-lock.json                               | 4686 [32m++++++++++++++++++++[m
+ AI/package.json                                    |   19 [32m+[m
+ AI/solarTerms.json                                 |  194 [31m-[m
+ AI/src/ai/__tests__/activityEngine.test.js         |   22 [32m+[m
+ AI/src/ai/__tests__/foodEngine.test.js             |   24 [32m+[m
+ AI/src/ai/__tests__/integration.test.js            |  266 [32m++[m
+ AI/src/ai/__tests__/layersEngine.test.js           |   73 [32m+[m
+ AI/src/ai/data/owmWeatherCodes.json                |   57 [32m+[m
+ AI/src/ai/data/ownWeatherCodes.json                |   57 [32m+[m
+ AI/src/ai/routes/aiAdvice.js                       |  153 [32m+[m
+ AI/src/ai/routes/aiChat.js                         |  171 [32m+[m
+ AI/src/ai/services/activityEngine.js               |   82 [32m+[m
+ AI/src/ai/services/amap.js                         |   39 [32m+[m
+ AI/src/ai/services/cache.js                        |   38 [32m+[m
+ AI/src/ai/services/deepseek.js                     |   32 [32m+[m
+ AI/src/ai/services/fallbackEngine.js               |   43 [32m+[m
+ AI/src/ai/services/foodEngine.js                   |   65 [32m+[m
+ AI/src/ai/services/layersEngine.js                 |   64 [32m+[m
+ AI/src/ai/services/openweather.js                  |  145 [32m+[m
+ AI/src/ai/services/solarTerm.js                    |   43 [32m+[m
+ AI/src/ai/services/weatherResponse.js              |   23 [32m+[m
+ AI/src/index.js                                    |   35 [32m+[m
+ Dockerfile                                         |   13 [32m+[m
+ README.md                                          |  289 [32m+[m[31m-[m
+ docs/1                                             |    1 [31m-[m
+ mobile/app/(tabs)/index.tsx                        | 1445 [32m+++++[m[31m-[m
+ mobile/assets/icons/about.svg                      |   16 [32m+[m
+ mobile/assets/icons/activity.svg                   |   10 [32m+[m
+ mobile/assets/icons/chat.svg                       |   15 [32m+[m
+ mobile/assets/icons/city.svg                       |    4 [32m+[m
+ mobile/assets/icons/clothes.svg                    |   10 [32m+[m
+ mobile/assets/icons/food.svg                       |    3 [32m+[m
+ mobile/assets/icons/heart-filled.svg               |    3 [32m+[m
+ mobile/assets/icons/heart.svg                      |   10 [32m+[m
+ mobile/assets/icons/help.svg                       |   11 [32m+[m
+ mobile/assets/icons/home.svg                       |   11 [32m+[m
+ mobile/assets/icons/humidity.svg                   |   10 [32m+[m
+ mobile/assets/icons/location.svg                   |   11 [32m+[m
+ mobile/assets/icons/logout.svg                     |   10 [32m+[m
+ mobile/assets/icons/notification.svg               |   10 [32m+[m
+ mobile/assets/icons/offline.svg                    |   11 [32m+[m
+ mobile/assets/icons/privacy.svg                    |   11 [32m+[m
+ mobile/assets/icons/profile.svg                    |   11 [32m+[m
+ mobile/assets/icons/search.svg                     |   11 [32m+[m
+ mobile/assets/icons/settings.svg                   |   11 [32m+[m
+ mobile/assets/icons/theme.svg                      |   14 [32m+[m
+ mobile/assets/icons/travel.svg                     |   13 [32m+[m
+ mobile/assets/icons/uv.svg                         |   10 [32m+[m
+ mobile/assets/icons/warning.svg                    |   10 [32m+[m
+ mobile/assets/icons/wind.svg                       |   10 [32m+[m
+ mobile/assets/solar-terms/bailu.png                |  Bin [31m0[m -> [32m18684[m bytes
+ mobile/assets/solar-terms/chunfen.png              |  Bin [31m0[m -> [32m31264[m bytes
+ mobile/assets/solar-terms/chushu.png               |  Bin [31m0[m -> [32m18462[m bytes
+ mobile/assets/solar-terms/dahan.png                |  Bin [31m0[m -> [32m7608[m bytes
+ mobile/assets/solar-terms/dashu.png                |  Bin [31m0[m -> [32m22661[m bytes
+ mobile/assets/solar-terms/daxue.png                |  Bin [31m0[m -> [32m15191[m bytes
+ mobile/assets/solar-terms/dongzhi.png              |  Bin [31m0[m -> [32m24184[m bytes
+ mobile/assets/solar-terms/guyu.png                 |  Bin [31m0[m -> [32m33833[m bytes
+ mobile/assets/solar-terms/hanlu.png                |  Bin [31m0[m -> [32m19745[m bytes
+ mobile/assets/solar-terms/jingzhe.png              |  Bin [31m0[m -> [32m31644[m bytes
+ mobile/assets/solar-terms/lichun.png               |  Bin [31m0[m -> [32m15396[m bytes
+ mobile/assets/solar-terms/lidong.png               |  Bin [31m0[m -> [32m28350[m bytes
+ mobile/assets/solar-terms/liqiu.png                |  Bin [31m0[m -> [32m19054[m bytes
+ mobile/assets/solar-terms/lixia.png                |  Bin [31m0[m -> [32m16894[m bytes
+ mobile/assets/solar-terms/mangzhong.png            |  Bin [31m0[m -> [32m19637[m bytes
+ mobile/assets/solar-terms/qingming.png             |  Bin [31m0[m -> [32m29714[m bytes
+ mobile/assets/solar-terms/qiufen.png               |  Bin [31m0[m -> [32m20292[m bytes
+ mobile/assets/solar-terms/shuangjiang.png          |  Bin [31m0[m -> [32m16551[m bytes
+ mobile/assets/solar-terms/xiaohan.png              |  Bin [31m0[m -> [32m11427[m bytes
+ mobile/assets/solar-terms/xiaoman.png              |  Bin [31m0[m -> [32m18917[m bytes
+ mobile/assets/solar-terms/xiaoshu.png              |  Bin [31m0[m -> [32m28099[m bytes
+ mobile/assets/solar-terms/xiaoxue.png              |  Bin [31m0[m -> [32m20387[m bytes
+ mobile/assets/solar-terms/xiazhi.png               |  Bin [31m0[m -> [32m21199[m bytes
+ mobile/assets/solar-terms/yushui.png               |  Bin [31m0[m -> [32m31347[m bytes
+ mobile/constants/solarTermDetails.ts               |  253 [32m++[m
+ mobile/package-lock.json                           | 1384 [32m+++[m[31m---[m
+ mobile/package.json                                |   36 [32m+[m[31m-[m
+ package-lock.json                                  |    6 [32m+[m
+ package.json                                       |    8 [32m+[m
+ sever/.env.example                                 |    6 [32m+[m
+ sever/.gitignore                                   |    4 [32m+[m
+ sever/1                                            |    1 [31m-[m
+ sever/package-lock.json                            | 1223 [32m+++++[m
+ sever/package.json                                 |   19 [32m+[m
+ sever/src/data/solarTerms.json                     |   26 [32m+[m
+ sever/src/index.js                                 |   65 [32m+[m
+ sever/src/localAiStore.js                          |   25 [32m+[m
+ sever/src/localUserStore.js                        |   92 [32m+[m
+ sever/src/middleware/auth.js                       |   16 [32m+[m
+ sever/src/models/Counter.js                        |   16 [32m+[m
+ sever/src/models/User.js                           |   61 [32m+[m
+ sever/src/routes/ai.js                             |  123 [32m+[m
+ sever/src/routes/aiSuggestions.js                  |  175 [32m+[m
+ sever/src/routes/auth.js                           |  150 [32m+[m
+ sever/src/routes/favorites.js                      |   75 [32m+[m
+ sever/src/routes/solarTerm.js                      |   42 [32m+[m
+ sever/src/routes/weather.js                        |  119 [32m+[m
+ web/.env                                           |    2 [32m+[m[31m-[m
+ web/.gitignore                                     |    1 [32m+[m
+ web/package-lock.json                              |   58 [32m+[m
+ web/package.json                                   |    1 [32m+[m
+ .../img/105/AI\345\212\251\346\211\213@2x 1.svg"   |    3 [32m+[m
+ web/public/img/105/Climate.svg                     |    3 [32m+[m
+ web/public/img/105/Ellipse 1.svg                   |    3 [32m+[m
+ web/public/img/105/Ellipse 12.svg                  |    3 [32m+[m
+ web/public/img/105/Ellipse 3.svg                   |    3 [32m+[m
+ web/public/img/105/Vector-1.svg                    |    3 [32m+[m
+ web/public/img/105/Vector-2.svg                    |    3 [32m+[m
+ web/public/img/105/Vector.svg                      |    0
+ web/public/img/105/about.svg                       |   12 [32m+[m
+ web/public/img/105/account.svg                     |    3 [32m+[m
+ web/public/img/105/air.svg                         |    3 [32m+[m
+ web/public/img/105/avatar.svg                      |    3 [32m+[m
+ web/public/img/105/bell.svg                        |    5 [32m+[m
+ web/public/img/105/cloudy.svg                      |   13 [32m+[m
+ web/public/img/105/dashboard 1.svg                 |    3 [32m+[m
+ web/public/img/105/help.svg                        |   12 [32m+[m
+ web/public/img/105/link.svg                        |   18 [32m+[m
+ web/public/img/105/lock.svg                        |    3 [32m+[m
+ web/public/img/105/overcast.svg                    |   16 [32m+[m
+ web/public/img/105/picture.svg                     |  557 [32m+++[m
+ web/public/img/105/rain.svg                        |    6 [32m+[m
+ web/public/img/105/rains.svg                       |   64 [32m+[m
+ web/public/img/105/robot.svg                       |  106 [32m+[m
+ web/public/img/105/search.svg                      |    9 [32m+[m
+ web/public/img/105/send.svg                        |   22 [32m+[m
+ web/public/img/105/setting.svg                     |    3 [32m+[m
+ web/public/img/105/sound.svg                       |    4 [32m+[m
+ web/public/img/105/sun.svg                         |   19 [32m+[m
+ web/public/img/105/sunny.svg                       |   13 [32m+[m
+ web/public/img/105/theme.svg                       |    7 [32m+[m
+ .../img/105/\346\224\266\350\227\217 (2) 1.svg"    |   11 [32m+[m
+ .../public/img/105/\346\227\245\345\216\206 1.svg" |    3 [32m+[m
+ .../img/105/\346\231\264\345\244\251 (1) 4.svg"    |   13 [32m+[m
+ .../public/img/105/\346\271\277\345\272\246 1.svg" |    4 [32m+[m
+ .../\345\206\254\350\207\263.png"                  |  Bin [31m0[m -> [32m24184[m bytes
+ .../\345\244\204\346\232\221.png"                  |  Bin [31m0[m -> [32m18462[m bytes
+ .../\345\244\217\350\207\263.png"                  |  Bin [31m0[m -> [32m21199[m bytes
+ .../\345\244\247\345\257\222.png"                  |  Bin [31m0[m -> [32m7608[m bytes
+ .../\345\244\247\346\232\221.png"                  |  Bin [31m0[m -> [32m22661[m bytes
+ .../\345\244\247\351\233\252.png"                  |  Bin [31m0[m -> [32m15191[m bytes
+ .../\345\257\222\351\234\262.png"                  |  Bin [31m0[m -> [32m19745[m bytes
+ .../\345\260\217\345\257\222.png"                  |  Bin [31m0[m -> [32m11427[m bytes
+ .../\345\260\217\346\232\221.png"                  |  Bin [31m0[m -> [32m28099[m bytes
+ .../\345\260\217\346\273\241.png"                  |  Bin [31m0[m -> [32m18917[m bytes
+ .../\345\260\217\351\233\252.png"                  |  Bin [31m0[m -> [32m20387[m bytes
+ .../\346\203\212\350\233\260.png"                  |  Bin [31m0[m -> [32m31644[m bytes
+ .../\346\230\245\345\210\206.png"                  |  Bin [31m0[m -> [32m31264[m bytes
+ .../\346\270\205\346\230\216.png"                  |  Bin [31m0[m -> [32m29714[m bytes
+ .../\347\231\275\351\234\262.png"                  |  Bin [31m0[m -> [32m18684[m bytes
+ .../\347\247\213\345\210\206.png"                  |  Bin [31m0[m -> [32m20292[m bytes
+ .../\347\253\213\345\206\254.png"                  |  Bin [31m0[m -> [32m28350[m bytes
+ .../\347\253\213\345\244\217.png"                  |  Bin [31m0[m -> [32m16894[m bytes
+ .../\347\253\213\346\230\245.png"                  |  Bin [31m0[m -> [32m15396[m bytes
+ .../\347\253\213\347\247\213.png"                  |  Bin [31m0[m -> [32m19054[m bytes
+ .../\350\212\222\347\247\215.png"                  |  Bin [31m0[m -> [32m19637[m bytes
+ .../\350\260\267\351\233\250.png"                  |  Bin [31m0[m -> [32m33833[m bytes
+ .../\351\233\250\346\260\264.png"                  |  Bin [31m0[m -> [32m31347[m bytes
+ .../\351\234\234\351\231\215.png"                  |  Bin [31m0[m -> [32m16551[m bytes
+ ...\345\207\272\347\231\273\345\275\225 (2) 1.svg" |    4 [32m+[m
+ .../img/105/\351\223\203\351\223\233 (3) 1.svg"    |    5 [32m+[m
+ .../public/img/105/\351\243\216\347\272\247 1.svg" |    4 [32m+[m
+ web/src/AiHelper.css                               |  261 [32m++[m
+ web/src/AiHelper.js                                |  121 [32m+[m
+ web/src/App.css                                    |  110 [32m+[m[31m-[m
+ web/src/App.js                                     |  176 [32m+[m[31m-[m
+ web/src/Calendar.css                               |  305 [32m++[m
+ web/src/Calendar.js                                |  127 [32m+[m
+ web/src/Dashboard.css                              |  349 [32m++[m
+ web/src/Dashboard.js                               |  444 [32m++[m
+ web/src/Login.css                                  |  101 [32m+[m
+ web/src/Login.js                                   |  101 [32m+[m
+ web/src/SavedLocation.css                          |  195 [32m+[m
+ web/src/SavedLocation.js                           |  263 [32m++[m
+ web/src/Setting.css                                |  296 [32m++[m
+ web/src/Setting.js                                 |  211 [32m+[m
+ web/src/Sidebar.css                                |   83 [32m+[m
+ web/src/Sidebar.js                                 |   68 [32m+[m
+ web/src/api.js                                     |   27 [32m+[m
+ web/src/index.js                                   |    8 [32m+[m[31m-[m
+ 187 files changed, 15340 insertions(+), 1552 deletions(-)
