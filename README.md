@@ -12,7 +12,7 @@ GitHub Repository: [https://github.com/Mingyue921/CS183-Weather-App](https://git
 | Chen Chuqi | 25126251 |Express APIs, JWT authentication, weather alerts, MongoDB storage, favorites management, solar-term matching, data gateway | Chatree-Q |
 | Huang Xinlei | 25125443 | Mobile UI design, icons, layout style, solar term visual presentation; also assisted web frontend members with selected web UI implementation and visual polishing | xinleihuang149-svg |
 | Huang Yichen | 25125451 | React web structure, Dashboard, Saved Location, Calendar, AI Helper, Settings | 3dfisnt |
-| Yang Qiyuan | 25124463 | Web dashboard UI, sidebar, cards, login/settings visual design, color system | Sally-design968 |
+| Yang Qiyuan | 25124463 | Web dashboard, sidebar, cards and login/settings UI plus other auxiliary web layouts; designed web core module visuals including Solar Term & Calendar; defined overall project color system | Sally-design968 |
 | Zhang Yuhan | 25124382 | AI advice generation, weather processing, fallback logic, JSON responses | ZYH-m23 |
 
 ## Project Overview
