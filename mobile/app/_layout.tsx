@@ -9,6 +9,9 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
+/**
+ * Author: Zhao YueXuan
+ */
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 

@@ -25,6 +25,9 @@ const TERMS = [
   { name: 'Winter Solstice', month: 12, day: 22 },
 ];
 
+/**
+ * Author: Zhang Yuhan
+ */
 function getTermName(date) {
   const month = date.getMonth() + 1;
   const day = date.getDate();

@@ -9,11 +9,17 @@ import Calendar from './Calendar';
 import Setting from './Setting';
 import { apiRequest } from './api';
 
+/**
+ * Author: Huang Yichen
+ */
 function App() {
   const [isLogin, setIsLogin] = useState(() => !!localStorage.getItem('token'));
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    /**
+     * Author: Huang Yichen
+     */
     const restoreSession = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -36,6 +42,9 @@ function App() {
     restoreSession();
   }, []);
 
+  /**
+   * Author: Huang Yichen
+   */
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('currentUser');

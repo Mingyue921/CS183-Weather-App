@@ -58,6 +58,9 @@ const solarTerms = termNames.map(([key, name, pinyin, season, date, summary]) =>
 
 const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
 
+/**
+ * Author: Huang Yichen
+ */
 function Calendar() {
   const [selectedTerm, setSelectedTerm] = useState(null);
 

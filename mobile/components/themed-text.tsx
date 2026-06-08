@@ -8,6 +8,9 @@ export type ThemedTextProps = TextProps & {
   type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
 };
 
+/**
+ * Author: Zhao YueXuan
+ */
 export function ThemedText({
   style,
   lightColor,

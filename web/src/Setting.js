@@ -40,6 +40,9 @@ const settingRows = [
   { icon: '/img/105/about.svg', title: 'About us' },
 ];
 
+/**
+ * Author: Yang Qiyuan
+ */
 function getStoredUser() {
   try {
     return JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -48,6 +51,9 @@ function getStoredUser() {
   }
 }
 
+/**
+ * Author: Yang Qiyuan
+ */
 function getWeatherContext() {
   try {
     return { ...defaultContext, ...JSON.parse(localStorage.getItem('currentWeatherContext') || '{}') };
@@ -56,6 +62,9 @@ function getWeatherContext() {
   }
 }
 
+/**
+ * Author: Yang Qiyuan
+ */
 export default function Setting({ isLogin, user }) {
   const navigate = useNavigate();
   const [selectedAdvice, setSelectedAdvice] = useState(null);
@@ -67,6 +76,9 @@ export default function Setting({ isLogin, user }) {
   const userId = isLogin ? (user?.id || '0000001') : '';
   const email = isLogin ? (user?.email || 'No email available') : '';
 
+  /**
+   * Author: Yang Qiyuan
+   */
   const openAdvice = async (item) => {
     const context = getWeatherContext();
     setSelectedAdvice(item);

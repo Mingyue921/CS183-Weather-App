@@ -1,3 +1,6 @@
+/**
+ * Author: Zhang Yuhan
+ */
 function recommend(temperature, humidity, windSpeed) {
   let layers = 0;
   let advice = '';

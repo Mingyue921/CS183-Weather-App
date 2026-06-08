@@ -34,6 +34,9 @@ const ADVICE_TYPES: Record<string, string> = {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
+/**
+ * Author: Zhao YueXuan
+ */
 const buildWeatherContext = (weatherData, location) => ({
   city: location?.name,
   weather: weatherData?.current ? {
@@ -45,6 +48,9 @@ const buildWeatherContext = (weatherData, location) => ({
   } : null,
 });
 
+/**
+ * Author: Zhao YueXuan
+ */
 const apiRequest = async (path: string, options: RequestInit = {}) => {
   const token = await AsyncStorage.getItem('authToken');
   const headers: Record<string, string> = {
@@ -68,6 +74,9 @@ const THEME = {
   shadow: 'rgba(245, 161, 74, 0.12)' 
 };
 
+/**
+ * Author: Zhao YueXuan
+ */
 const getWeatherIconCode = (text = '') => {
   if (text.includes('雷')) return '11d';
   if (text.includes('雪')) return '13d';
@@ -97,6 +106,9 @@ const WEATHER_TEXT_MAP: Record<string, string> = {
   '霾': 'Haze',
 };
 
+/**
+ * Author: Zhao YueXuan
+ */
 const translateWeatherText = (text = '') => WEATHER_TEXT_MAP[text] || text;
 
 const fetchJson = async (url: string) => {
@@ -108,6 +120,9 @@ const fetchJson = async (url: string) => {
   return data;
 };
 
+/**
+ * Author: Zhao YueXuan
+ */
 const fetchJsonWithTimeout = async (url: string, timeoutMs = 6000) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -123,26 +138,41 @@ const fetchJsonWithTimeout = async (url: string, timeoutMs = 6000) => {
   }
 };
 
+/**
+ * Author: Zhao YueXuan
+ */
 const isAbortError = (error: unknown) => (
   error instanceof Error && (error.name === 'AbortError' || error.message.toLowerCase().includes('aborted'))
 );
 
+/**
+ * Author: Zhao YueXuan
+ */
 const toNumber = (value: unknown, fallback = 0) => {
   const numberValue = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
   return Number.isFinite(numberValue) ? numberValue : fallback;
 };
 
+/**
+ * Author: Zhao YueXuan
+ */
 const toAdviceItems = (text = '') => text
   .split(/\n|,|;|、/)
   .map(item => item.replace(/^[-•\s]+/, '').trim())
   .filter(Boolean);
 
+/**
+ * Author: Zhao YueXuan
+ */
 const formatAdviceList = (items: string[]) => {
   if (items.length <= 1) return items[0] || '';
   if (items.length === 2) return `${items[0]} and ${items[1]}`;
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 };
 
+/**
+ * Author: Zhao YueXuan
+ */
 const polishAdviceReply = (text = '', type = '') => {
   const trimmed = String(text || '').trim();
   if (!trimmed) return 'No advice returned yet. Please try again later.';
@@ -241,6 +271,9 @@ const SOLAR_TERM_IMAGES: Record<string, number> = {
 };
 
 //获取当前/下一个节气状态
+/**
+ * Author: Zhao YueXuan
+ */
 const getSolarTermInfo = () => {
   const today = new Date();
   const current = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -257,6 +290,9 @@ const getSolarTermInfo = () => {
 // ==========================================
 // ☁️ 通用组件库
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 const OpenWeatherIcon = ({ iconCode, size = 50 }: { iconCode: string; size?: number }) => (
   <Image source={{ uri: `https://openweathermap.org/img/wn/${iconCode}@4x.png` }} style={{ width: size, height: size }} resizeMode="contain" />
 );
@@ -311,6 +347,9 @@ const CITY_SEARCH_ALIASES: Record<string, { query: string; displayName: string; 
   福州市: { query: '福州市', displayName: 'Fuzhou', district: 'Fujian Province, Fuzhou City' },
 };
 
+/**
+ * Author: Zhao YueXuan
+ */
 const getCitySearchAlias = (keyword = '') => CITY_SEARCH_ALIASES[keyword.trim().toLowerCase()];
 
 const UiIcon = ({ name, size = 20, color = THEME.primary, bg = 'transparent', radius = 10 }: { name: string; size?: number; color?: string; bg?: string; radius?: number }) => {
@@ -332,6 +371,9 @@ const UiIcon = ({ name, size = 20, color = THEME.primary, bg = 'transparent', ra
 // ==========================================
 // 📱 核心主程序 (全局数据流)
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 export default function WeatherApp() {
   const [currentScreen, setCurrentScreen] = useState('Home'); 
   const [isLogged, setIsLogged] = useState(false);
@@ -346,6 +388,9 @@ export default function WeatherApp() {
   const [alertReturnScreen, setAlertReturnScreen] = useState('Home');
 
   useEffect(() => {
+    /**
+     * Author: Zhao YueXuan
+     */
     const restoreSession = async () => {
       const token = await AsyncStorage.getItem('authToken');
       const savedUser = await AsyncStorage.getItem('currentUser');
@@ -367,6 +412,9 @@ export default function WeatherApp() {
   }, []);
 
   useEffect(() => {
+    /**
+     * Author: Zhao YueXuan
+     */
     const fetchAmapWeather = async () => {
       const geoUrl = `https://restapi.amap.com/v3/geocode/regeo?location=${globalLocation.lon},${globalLocation.lat}&key=${API_KEYS.AMAP}&extensions=base`;
       const geoData = await fetchJsonWithTimeout(geoUrl, 5000);
@@ -412,6 +460,9 @@ export default function WeatherApp() {
       };
     };
 
+    /**
+     * Author: Zhao YueXuan
+     */
     const fetchWeather = async () => {
       setWeatherLoading(true);
       setWeatherError('');
@@ -445,6 +496,9 @@ export default function WeatherApp() {
     fetchWeather();
   }, [globalLocation]);
 
+  /**
+   * Author: Zhao YueXuan
+   */
   const navigate = (screenName, params) => {
     if (params?.newLocation) setGlobalLocation(params.newLocation);
     if (params?.termName) setSelectedSolarTerm(params.termName);
@@ -453,6 +507,9 @@ export default function WeatherApp() {
     setCurrentScreen(screenName);
   };
 
+  /**
+   * Author: Zhao YueXuan
+   */
   const renderBottomTabs = () => {
     if (!['Home', 'AI', 'Profile', 'Auth'].includes(currentScreen)) return null;
     return (
@@ -496,6 +553,9 @@ export default function WeatherApp() {
 // ==========================================
 // 📱 页面 1：首页
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function HomeScreen({ navigate, location, weatherData, loading, error, source }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const { term } = getSolarTermInfo(); 
@@ -504,12 +564,18 @@ function HomeScreen({ navigate, location, weatherData, loading, error, source })
     checkFavoriteStatus(location.name);
   }, [location]);
 
+  /**
+   * Author: Zhao YueXuan
+   */
   const checkFavoriteStatus = async (cityName) => {
     const saved = await AsyncStorage.getItem('favorites');
     const favList = saved ? JSON.parse(saved) : [];
     setIsFavorite(favList.some(item => item.name === cityName));
   };
 
+  /**
+   * Author: Zhao YueXuan
+   */
   const toggleFavorite = async () => {
     const saved = await AsyncStorage.getItem('favorites');
     let favList = saved ? JSON.parse(saved) : [];
@@ -630,6 +696,9 @@ function HomeScreen({ navigate, location, weatherData, loading, error, source })
 // ==========================================
 // 📱 页面 2：AI 对话
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function ChatScreen({ weatherData, location, loading }) {
   const initialAssistantMessage = 'Hi, I am your smart weather assistant. Ask me for travel, clothing, activity, or food advice.';
   const [messages, setMessages] = useState([
@@ -638,6 +707,9 @@ function ChatScreen({ weatherData, location, loading }) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
 
+  /**
+   * Author: Zhao YueXuan
+   */
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || sending) return;
@@ -719,6 +791,9 @@ function ChatScreen({ weatherData, location, loading }) {
 // ==========================================
 // 📱 页面 3：我的
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function ProfileScreen({ navigate, setIsLogged, user, setCurrentUser }) {
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
@@ -778,6 +853,9 @@ function ProfileScreen({ navigate, setIsLogged, user, setCurrentUser }) {
 // ==========================================
 // 📱 页面 4：智能搜索 (✨ 终极版：强行置顶省市区 ✨)
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function CitySearchScreen({ navigate }) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -792,6 +870,9 @@ function CitySearchScreen({ navigate }) {
     return () => clearTimeout(debounceTimer.current);
   }, [query]);
 
+  /**
+   * Author: Zhao YueXuan
+   */
   const fetchAmapSuggestions = async (keyword) => {
     try {
       setErrorMsg('');
@@ -848,6 +929,9 @@ function CitySearchScreen({ navigate }) {
     }
   };
 
+  /**
+   * Author: Zhao YueXuan
+   */
   const handleSelect = (item) => {
     const [lon, lat] = item.location.split(',');
     // 跳转回首页，传递坐标和名字
@@ -893,9 +977,15 @@ function CitySearchScreen({ navigate }) {
 // ==========================================
 // 📱 页面 5：节气
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function SolarTermsScreen({ navigate }) {
   const { isToday } = getSolarTermInfo();
 
+  /**
+   * Author: Zhao YueXuan
+   */
   const getNextSolarTerm = () => {
     const today = new Date();
     const current = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -904,6 +994,9 @@ function SolarTermsScreen({ navigate }) {
   };
 
   const upcomingTerm = getNextSolarTerm();
+  /**
+   * Author: Zhao YueXuan
+   */
   const renderTermItem = (name: string, backgroundColor: string) => {
     const image = SOLAR_TERM_IMAGES[name];
     return (
@@ -960,6 +1053,9 @@ function SolarTermsScreen({ navigate }) {
 // ==========================================
 // 📱 页面 6：节气详情
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function SolarTermDetailScreen({ navigate, termName }) {
   const detail = SOLAR_TERM_DETAILS[termName] || SOLAR_TERM_DETAILS['立春'];
   const termMeta = SOLAR_TERMS.find(item => item.name === termName);
@@ -1016,9 +1112,15 @@ function SolarTermDetailScreen({ navigate, termName }) {
 // ==========================================
 // 📱 页面 7：收藏页
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function CollectionScreen({ navigate }) {
   const [favorites, setFavorites] = useState([]);
   useEffect(() => {
+    /**
+     * Author: Zhao YueXuan
+     */
     const loadFavs = async () => {
       const saved = await AsyncStorage.getItem('favorites');
       if (saved) setFavorites(JSON.parse(saved));
@@ -1048,6 +1150,9 @@ function CollectionScreen({ navigate }) {
 // ==========================================
 // 📱 页面 8：账号信息
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function AccountInfoScreen({ navigate, user, setCurrentUser }) {
   const [nickname, setNickname] = useState(user.nickname || 'Sunny Nuan');
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
@@ -1058,6 +1163,9 @@ function AccountInfoScreen({ navigate, user, setCurrentUser }) {
     setAvatarUrl(user.avatarUrl || '');
   }, [user]);
 
+  /**
+   * Author: Zhao YueXuan
+   */
   const saveProfile = async () => {
     setSaving(true);
     try {
@@ -1113,6 +1221,9 @@ function AccountInfoScreen({ navigate, user, setCurrentUser }) {
 // ==========================================
 // 📱 页面 9：预警通知
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function WeatherAlertsScreen({ navigate, location, returnTo }) {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1120,6 +1231,9 @@ function WeatherAlertsScreen({ navigate, location, returnTo }) {
   const [serviceUnavailable, setServiceUnavailable] = useState(false);
 
   useEffect(() => {
+    /**
+     * Author: Zhao YueXuan
+     */
     const fetchAlerts = async () => {
       setLoading(true);
       setNotice('');
@@ -1184,12 +1298,18 @@ function WeatherAlertsScreen({ navigate, location, returnTo }) {
 // ==========================================
 // 📱 页面 10：AI 生活建议
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function AdviceDetailScreen({ navigate, type, weatherData, location }) {
   const [reply, setReply] = useState('');
   const [loading, setLoading] = useState(true);
   const title = ADVICE_TYPES[type] || 'AI Advice';
 
   useEffect(() => {
+    /**
+     * Author: Zhao YueXuan
+     */
     const fetchAdvice = async () => {
       setLoading(true);
       try {
@@ -1237,6 +1357,9 @@ function AdviceDetailScreen({ navigate, type, weatherData, location }) {
 // ==========================================
 // 📱 页面 7：注册 / 登录
 // ==========================================
+/**
+ * Author: Zhao YueXuan
+ */
 function AuthScreen({ navigate, setIsLogged, setCurrentUser }) {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [email, setEmail] = useState('');
@@ -1245,6 +1368,9 @@ function AuthScreen({ navigate, setIsLogged, setCurrentUser }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   
+  /**
+   * Author: Zhao YueXuan
+   */
   const handleAuthAction = async () => {
     const normalizedEmail = email.trim();
     if (!normalizedEmail || !password) {

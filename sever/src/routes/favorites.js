@@ -5,9 +5,15 @@ const localUsers = require('../localUserStore');
 const router = express.Router();
 
 // 所有收藏接口都需要登录
+/**
+ * Author: Chen Chuqi
+ */
 router.use(auth);
 
 // GET /api/favorites — 获取收藏列表
+/**
+ * Author: Chen Chuqi
+ */
 router.get('/', async (req, res) => {
   try {
     if (req.user.local || !req.app.locals.dbReady) {
@@ -24,6 +30,9 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/favorites — 添加收藏城市
+/**
+ * Author: Chen Chuqi
+ */
 router.post('/', async (req, res) => {
   try {
     const { city } = req.body;
@@ -51,6 +60,9 @@ router.post('/', async (req, res) => {
 });
 
 // DELETE /api/favorites/:city — 删除收藏城市
+/**
+ * Author: Chen Chuqi
+ */
 router.delete('/:city', async (req, res) => {
   try {
     const cityName = decodeURIComponent(req.params.city);

@@ -7,6 +7,9 @@ export type ThemedViewProps = ViewProps & {
   darkColor?: string;
 };
 
+/**
+ * Author: Zhao YueXuan
+ */
 export function ThemedView({ style, lightColor, darkColor, ...otherProps }: ThemedViewProps) {
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
 

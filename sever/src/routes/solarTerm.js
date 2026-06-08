@@ -5,12 +5,18 @@ const router = express.Router();
 const terms = require(path.join(__dirname, '..', 'data', 'solarTerms.json'));
 
 // MM-DD → M*100+D 数值，用于区间比较
+/**
+ * Author: Chen Chuqi
+ */
 const toInt = (mmdd) => {
   const [m, d] = mmdd.split('-').map(Number);
   return m * 100 + d;
 };
 
 // GET /api/solar-term?date=2026-04-20
+/**
+ * Author: Chen Chuqi
+ */
 router.get('/', (req, res) => {
   const { date } = req.query;
   if (!date) return res.status(400).json({ error: 'date is required (YYYY-MM-DD)' });
@@ -35,6 +41,9 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/solar-term/all — 返回全部24节气
+/**
+ * Author: Chen Chuqi
+ */
 router.get('/all', (req, res) => {
   res.json({ solarTerms: terms });
 });

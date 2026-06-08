@@ -10,11 +10,17 @@ const DEEPSEEK_BASE = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com
 
 const terms = require(path.join(__dirname, '..', 'data', 'solarTerms.json'));
 
+/**
+ * Author: Chen Chuqi
+ */
 const toInt = (mmdd = '') => {
   const [month, day] = mmdd.split('-').map(Number);
   return month * 100 + day;
 };
 
+/**
+ * Author: Chen Chuqi
+ */
 const findSolarTerm = (date) => {
   const target = new Date(date);
   if (Number.isNaN(target.getTime())) return null;
@@ -29,6 +35,9 @@ const findSolarTerm = (date) => {
   }) || null;
 };
 
+/**
+ * Author: Chen Chuqi
+ */
 const buildFallback = (weather, term) => {
   const temp = Number(weather.main?.temp ?? 20);
   const description = weather.weather?.[0]?.description || 'clear weather';
@@ -77,6 +86,9 @@ const buildFallback = (weather, term) => {
   };
 };
 
+/**
+ * Author: Chen Chuqi
+ */
 const extractJsonObject = (text = '') => {
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) return null;
@@ -88,6 +100,9 @@ const extractJsonObject = (text = '') => {
 };
 
 // GET /api/ai-suggestions?city=Beijing&date=2026-04-20
+/**
+ * Author: Chen Chuqi
+ */
 router.get('/', async (req, res) => {
   const { city, date } = req.query;
   if (!city) return res.status(400).json({ error: 'city is required' });

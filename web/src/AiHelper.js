@@ -4,6 +4,9 @@ import './AiHelper.css';
 
 const iconBase = '/img/105';
 
+/**
+ * Author: Huang Yichen
+ */
 function AiHelper() {
   const [msg, setMsg] = useState('');
   const [reply, setReply] = useState('');
@@ -16,6 +19,9 @@ function AiHelper() {
     'Help me compare the weather between A and B.',
   ];
 
+  /**
+   * Author: Huang Yichen
+   */
   const sendMessage = async () => {
     const text = msg.trim();
     if (!text || loading) return;

@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 // 关键：接收 setIsLogin 和 setUser 两个 props
+/**
+ * Author: Yang Qiyuan
+ */
 export default function Login({ setIsLogin, setUser }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -12,6 +15,9 @@ export default function Login({ setIsLogin, setUser }) {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  /**
+   * Author: Yang Qiyuan
+   */
   const handleSubmit = async () => {
     if (!email.trim() || !password) {
       alert('Please enter email and password.');

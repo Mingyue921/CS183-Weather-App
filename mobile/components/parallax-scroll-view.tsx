@@ -18,6 +18,9 @@ type Props = PropsWithChildren<{
   headerBackgroundColor: { dark: string; light: string };
 }>;
 
+/**
+ * Author: Zhao YueXuan
+ */
 export default function ParallaxScrollView({
   children,
   headerImage,

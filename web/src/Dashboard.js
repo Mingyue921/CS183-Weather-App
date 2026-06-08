@@ -11,6 +11,9 @@ const CITY_SEARCH_ALIASES = {
   '\u798F\u5DDE\u5E02': FUZHOU_AMAP,
 };
 
+/**
+ * Author: Huang Yichen
+ */
 const normalizeCityQuery = (value = '') => CITY_SEARCH_ALIASES[value.trim().toLowerCase()] || value.trim();
 
 function readStoredFavorites() {
@@ -24,12 +27,18 @@ function readStoredFavorites() {
 
 const OPENWEATHER_TIMEOUT_MS = 120000;
 
+/**
+ * Author: Huang Yichen
+ */
 function fetchWithTimeout(url, timeoutMs = OPENWEATHER_TIMEOUT_MS) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timeout));
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function getAirQuality(value = 60) {
   const humidity = Number(value);
   if (humidity < 65) return 'good';
@@ -37,12 +46,18 @@ function getAirQuality(value = 60) {
   return 'normal';
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function windDegToDirection(deg) {
   const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   const index = Math.round(deg / 45) % 8;
   return directions[index];
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function Dashboard() {
   const [city, setCity] = useState(() => {
     return localStorage.getItem('lastSearchCity') || '';
@@ -70,6 +85,9 @@ function Dashboard() {
     window.dispatchEvent(new Event('weatherFavoritesChanged'));
   }, [favorites]);
 
+  /**
+   * Author: Huang Yichen
+   */
   const getWindDir = (windDir) => {
     const map = {
       '\u4E1C': 'E',
@@ -84,18 +102,27 @@ function Dashboard() {
     return map[windDir] || windDir || 'N/A';
   };
 
+  /**
+   * Author: Huang Yichen
+   */
   const getRainLevel = (val) => {
     if (val < 30) return 'Low';
     if (val < 70) return 'Mid';
     return 'High';
   };
 
+  /**
+   * Author: Huang Yichen
+   */
   const getUvLevel = (val) => {
     if (val < 3) return 'Low';
     if (val < 7) return 'Mid';
     return 'High';
   };
 
+  /**
+   * Author: Huang Yichen
+   */
   const getPressureStatus = (press) => {
     const p = Number(press);
     if (p < 1000) return 'Low';
@@ -103,6 +130,9 @@ function Dashboard() {
     return 'Normal';
   };
 
+  /**
+   * Author: Huang Yichen
+   */
   const getWeatherIcon = (weatherText = '') => {
     const text = String(weatherText).toLowerCase();
     if (text.includes('sun') || text.includes('clear') || text.includes('\u6674')) return 'sunny.svg';
@@ -112,6 +142,9 @@ function Dashboard() {
     return 'cloudy.svg';
   };
 
+  /**
+   * Author: Huang Yichen
+   */
   const buildCurrentFromOpenWeather = (currentData, dailyData, fallbackCity) => {
     const oneCallCurrent = dailyData?.current || {};
     const firstDaily = dailyData?.daily?.[0] || {};
@@ -152,6 +185,9 @@ function Dashboard() {
     };
   };
 
+  /**
+   * Author: Huang Yichen
+   */
   const buildForecastFromDaily = (daily = []) => daily.slice(0, 7).map((item) => ({
     date: new Date((item.dt || Date.now() / 1000) * 1000).toISOString(),
     daytemp: Math.round(item.temp?.max ?? item.temp?.day ?? 0),
@@ -159,6 +195,9 @@ function Dashboard() {
     dayweather: item.weather?.[0]?.description || 'Clear',
   }));
 
+  /**
+   * Author: Huang Yichen
+   */
   const buildForecastFromOpenWeather = (data) => (data.list || []).slice(0, 7).map((item) => ({
     date: item.dt_txt || new Date((item.dt || Date.now() / 1000) * 1000).toISOString(),
     daytemp: Math.round(item.main?.temp_max ?? item.main?.temp ?? 0),
@@ -166,6 +205,9 @@ function Dashboard() {
     dayweather: item.weather?.[0]?.description || 'Clear',
   }));
 
+  /**
+   * Author: Huang Yichen
+   */
   const fetchBackendWeather = async (cityName) => {
     const currentRes = await fetchWithTimeout(`${API_BASE_URL}/api/weather/current?city=${encodeURIComponent(cityName)}`, OPENWEATHER_TIMEOUT_MS);
     if (!currentRes.ok) throw new Error('OpenWeather current weather failed');
@@ -193,6 +235,9 @@ function Dashboard() {
     };
   };
 
+  /**
+   * Author: Huang Yichen
+   */
   const fetchAmapWeather = async (cityName) => {
     const searchCity = normalizeCityQuery(cityName);
     const url = `https://restapi.amap.com/v3/weather/weatherInfo?city=${encodeURIComponent(searchCity)}&key=${API_KEY}&extensions=all&output=json`;
@@ -236,6 +281,9 @@ function Dashboard() {
     };
   };
 
+  /**
+   * Author: Huang Yichen
+   */
   const fetchWeather = async () => {
     const trimmedCity = city.trim();
     if (!trimmedCity) {
@@ -272,6 +320,9 @@ function Dashboard() {
     setLoading(false);
   };
 
+  /**
+   * Author: Huang Yichen
+   */
   const toggleFavorite = () => {
     if (!favoriteCity) return;
     setFavorites((current) =>

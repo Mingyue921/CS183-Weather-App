@@ -5,6 +5,9 @@ import './SavedLocation.css';
 const iconBase = '/img/105';
 const amapKey = process.env.REACT_APP_WEATHER_KEY;
 
+/**
+ * Author: Huang Yichen
+ */
 function SavedLocation() {
   const [query, setQuery] = useState('');
   const [favorites, setFavorites] = useState([]);
@@ -14,6 +17,9 @@ function SavedLocation() {
 
   // 关键：监听收藏变化事件
   useEffect(() => {
+    /**
+     * Author: Huang Yichen
+     */
     const handleFavoritesChanged = () => {
       const local = readLocalFavorites();
       setFavorites(local);
@@ -51,6 +57,9 @@ function SavedLocation() {
     };
   }, [favorites]);
 
+  /**
+   * Author: Huang Yichen
+   */
   const addFavorite = async (event) => {
     event.preventDefault();
     const city = query.trim();
@@ -70,6 +79,9 @@ function SavedLocation() {
     setQuery('');
   };
 
+  /**
+   * Author: Huang Yichen
+   */
   const removeFavorite = async (city) => {
     const newFavs = favorites.filter((item) => item !== city);
     setFavorites(newFavs);
@@ -149,12 +161,18 @@ function SavedLocation() {
   );
 }
 
+/**
+ * Author: Huang Yichen
+ */
 async function fetchCityWeather(city) {
   const backendWeather = await fetchBackendWeather(city);
   if (backendWeather) return backendWeather;
   return fetchAmapWeather(city);
 }
 
+/**
+ * Author: Huang Yichen
+ */
 async function fetchBackendWeather(city) {
   try {
     const response = await fetch(
@@ -179,6 +197,9 @@ async function fetchBackendWeather(city) {
   }
 }
 
+/**
+ * Author: Huang Yichen
+ */
 async function fetchAmapWeather(city) {
   if (!amapKey) return null;
 
@@ -207,6 +228,9 @@ async function fetchAmapWeather(city) {
   }
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function readLocalFavorites() {
   try {
     return normalizeFavorites(JSON.parse(localStorage.getItem('weatherFavorites') || '[]'));
@@ -215,14 +239,23 @@ function readLocalFavorites() {
   }
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function normalizeFavorites(value) {
   return uniqueCities(Array.isArray(value) ? value : []);
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function uniqueCities(cities) {
   return [...new Set(cities.map((city) => String(city).trim()).filter(Boolean))];
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function formatDate(timestamp) {
   const date = timestamp ? new Date(timestamp * 1000) : new Date();
   const month = date.getMonth() + 1;
@@ -231,6 +264,9 @@ function formatDate(timestamp) {
   return `${month}.${day} ${weekday}.`;
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function normalizeDescription(description = 'Sunny') {
   const lower = String(description).toLowerCase();
   if (lower.includes('cloud') || lower.includes('云')) return 'Cloudy';
@@ -239,6 +275,9 @@ function normalizeDescription(description = 'Sunny') {
   return 'Sunny';
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function getWeatherIcon(description = '') {
   const lower = String(description).toLowerCase();
   if (lower.includes('cloud') || lower.includes('云')) return 'cloudy.svg';
@@ -247,12 +286,18 @@ function getWeatherIcon(description = '') {
   return 'sunny.svg';
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function toWindForce(speed = 0) {
   const value = Number(speed);
   if (Number.isNaN(value)) return speed || 0;
   return Math.max(0, Math.round(value / 1.6));
 }
 
+/**
+ * Author: Huang Yichen
+ */
 function getAirQuality(value = 60) {
   const humidity = Number(value);
   if (humidity < 65) return 'good';

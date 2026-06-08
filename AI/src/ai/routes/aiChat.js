@@ -9,6 +9,9 @@ const cache = require('../services/cache');
 const solarTerm = require('../services/solarTerm');
 const weatherCodes = require('../data/owmWeatherCodes.json');
 
+/**
+ * Author: Zhang Yuhan
+ */
 function buildContextPrompt(weatherData, termName, uv, air, localAdvice) {
   const weatherName = weatherCodes[String(weatherData.weatherId)] || weatherData.weatherMain;
   let prompt = `[Current Weather Context — answer user questions based on this]
@@ -45,6 +48,9 @@ Naturally incorporate the above weather, solar term, and local recommendation in
   return prompt;
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 function buildNoWeatherPrompt(termName) {
   return `[Current Time Context]
 - Current Solar Term: ${termName}
@@ -52,6 +58,9 @@ function buildNoWeatherPrompt(termName) {
 If the user asks about seasons, please incorporate the above solar term information in your response.`;
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 function buildFallbackReply(localAdvice, userMessage) {
   const msg = (userMessage || '').toLowerCase();
 
@@ -77,6 +86,9 @@ Activities: ${localAdvice.activity.recommended.slice(0, 5).join(', ')}
 Current Solar Term: "${localAdvice.solarTerm}"`;
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 router.post('/chat', async (req, res) => {
   try {
     const { messages, city } = req.body;

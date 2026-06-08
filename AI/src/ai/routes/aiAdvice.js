@@ -10,6 +10,9 @@ const cache = require('../services/cache');
 const solarTerm = require('../services/solarTerm');
 const weatherCodes = require('../data/owmWeatherCodes.json');
 
+/**
+ * Author: Zhang Yuhan
+ */
 function buildAdvicePrompt(weatherData, forecastDays, uv, air, termName) {
   const weatherName = weatherCodes[String(weatherData.weatherId)] || weatherData.weatherMain;
   const summary = (forecastDays && forecastDays.length > 0)
@@ -41,6 +44,9 @@ Please reply in English with exactly four sections, each 1-3 sentences only:
 4. Food Advice: what to eat or drink to stay comfortable in this weather`;
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 router.post('/advice', async (req, res, next) => {
   try {
     const { city } = req.body;

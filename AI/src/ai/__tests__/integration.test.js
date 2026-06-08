@@ -37,6 +37,9 @@ const mockCurrentWeather = {
 const mockUV = { value: 5.2, level: 'Moderate' };
 const mockAir = { aqi: 2, level: 'Fair', components: { pm2_5: 12.0, pm10: 25.0 } };
 
+/**
+ * Author: Zhang Yuhan
+ */
 function makeMockDaily(index) {
   const baseTemp = 23 + index;
   return {
@@ -96,6 +99,9 @@ beforeEach(() => {
   solarTerm.getTermName.mockReturnValue('Summer Begins');
 });
 
+/**
+ * Author: Zhang Yuhan
+ */
 function findPostHandler(routerInstance) {
   for (const layer of routerInstance.stack) {
     if (layer.route && layer.route.path === '/advice' && layer.route.methods.post) {

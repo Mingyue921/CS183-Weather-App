@@ -18,6 +18,9 @@ const adviceTitles = {
   diet: 'Food Advice',
 };
 
+/**
+ * Author: Chen Chuqi
+ */
 function normalizeCityName(city = '') {
   const value = String(city || '').trim();
   if (!value) return '';
@@ -48,11 +51,17 @@ const fallbackMap = {
   diet: ({ weather }) => `For ${weather?.description || 'today\'s weather'}, keep meals light and balanced. Drink enough water, choose seasonal fruit and vegetables, and consider barley or yam when the weather feels humid.`,
 };
 
+/**
+ * Author: Chen Chuqi
+ */
 function normalizeList(value) {
   if (Array.isArray(value)) return value.join(', ');
   return value || '';
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 function pickAdvice(raw, type) {
   const field = adviceTypeToField[type];
   if (!field) return '';
@@ -61,6 +70,9 @@ function pickAdvice(raw, type) {
   return normalizeList(raw[field]);
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 async function callAiService(path, body) {
   const response = await fetch(`${AI_SERVICE_BASE_URL}${path}`, {
     method: 'POST',
@@ -74,6 +86,9 @@ async function callAiService(path, body) {
   return data;
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 router.post('/chat', async (req, res) => {
   const { message = '', city, messages } = req.body;
   const aiMessages = Array.isArray(messages)
@@ -95,6 +110,9 @@ router.post('/chat', async (req, res) => {
   }
 });
 
+/**
+ * Author: Chen Chuqi
+ */
 router.post('/advice', async (req, res) => {
   const { type, city, weather } = req.body;
   if (!adviceTypeToField[type]) return res.status(400).json({ error: 'Unknown advice type' });

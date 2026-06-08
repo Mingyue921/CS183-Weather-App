@@ -6,6 +6,9 @@ const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 const ONECALL_URL = 'https://api.openweathermap.org/data/3.0/onecall';
 const OPENWEATHER_TIMEOUT_MS = 120000;
 
+/**
+ * Author: Chen Chuqi
+ */
 async function fetchOpenWeather(url) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), OPENWEATHER_TIMEOUT_MS);
@@ -17,6 +20,9 @@ async function fetchOpenWeather(url) {
 }
 
 // GET /api/weather/current?city=Beijing
+/**
+ * Author: Chen Chuqi
+ */
 router.get('/current', async (req, res) => {
   const { city } = req.query;
   if (!city) return res.status(400).json({ error: 'city is required' });
@@ -34,6 +40,9 @@ router.get('/current', async (req, res) => {
 });
 
 // GET /api/weather/forecast?city=Beijing
+/**
+ * Author: Chen Chuqi
+ */
 router.get('/forecast', async (req, res) => {
   const { city } = req.query;
   if (!city) return res.status(400).json({ error: 'city is required' });
@@ -54,6 +63,9 @@ router.get('/forecast', async (req, res) => {
 });
 
 // GET /api/weather/daily?lat=26.08&lon=119.30
+/**
+ * Author: Chen Chuqi
+ */
 router.get('/daily', async (req, res) => {
   const { lat, lon } = req.query;
   if (!lat || !lon) return res.status(400).json({ error: 'lat and lon are required' });
@@ -76,6 +88,9 @@ router.get('/daily', async (req, res) => {
 });
 
 // GET /api/weather/alerts?lat=26.08&lon=119.30
+/**
+ * Author: Chen Chuqi
+ */
 router.get('/alerts', async (req, res) => {
   const { lat, lon } = req.query;
   if (!lat || !lon) return res.status(400).json({ error: 'lat and lon are required' });

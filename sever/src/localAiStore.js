@@ -3,6 +3,9 @@ const path = require('path');
 
 const STORE_PATH = path.join(__dirname, 'data', 'ai-responses.local.json');
 
+/**
+ * Author: Chen Chuqi
+ */
 async function readStore() {
   try {
     const raw = await fs.readFile(STORE_PATH, 'utf8');
@@ -12,6 +15,9 @@ async function readStore() {
   }
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 async function appendAiResponse(entry) {
   const store = await readStore();
   store.unshift({

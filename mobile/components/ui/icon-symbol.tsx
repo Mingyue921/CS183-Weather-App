@@ -25,6 +25,9 @@ const MAPPING = {
  * This ensures a consistent look across platforms, and optimal resource usage.
  * Icon `name`s are based on SF Symbols and require manual mapping to Material Icons.
  */
+/**
+ * Author: Zhao YueXuan
+ */
 export function IconSymbol({
   name,
   size = 24,

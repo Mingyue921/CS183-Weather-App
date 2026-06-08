@@ -1,3 +1,6 @@
+/**
+ * Author: Zhang Yuhan
+ */
 function recommend(temperature, weatherId, weatherMain, windSpeed) {
   const activities = [];
   const warnings = [];

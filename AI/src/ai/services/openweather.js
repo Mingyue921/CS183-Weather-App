@@ -10,12 +10,18 @@ const api = axios.create({
   timeout: 10000,
 });
 
+/**
+ * Author: Zhang Yuhan
+ */
 function windDegToDirection(deg) {
   const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   const index = Math.round(deg / 45) % 8;
   return directions[index];
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 async function getUVIndex(lat, lon) {
   try {
     const response = await api.get(`${BASE_URL}/uvi`, {
@@ -30,6 +36,9 @@ async function getUVIndex(lat, lon) {
   }
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 async function getAirQuality(lat, lon) {
   try {
     const response = await api.get(`${BASE_URL}/air_pollution`, {
@@ -46,6 +55,9 @@ async function getAirQuality(lat, lon) {
   }
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 function uvLevel(value) {
   if (value <= 2) return 'Low';
   if (value <= 5) return 'Moderate';
@@ -54,6 +66,9 @@ function uvLevel(value) {
   return 'Extreme';
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 function aqiLevel(aqi) {
   if (aqi === 1) return 'Good';
   if (aqi === 2) return 'Fair';
@@ -62,6 +77,9 @@ function aqiLevel(aqi) {
   return 'Very Poor';
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 async function getCurrentByCoords(lat, lon) {
   const response = await api.get(`${BASE_URL}/weather`, {
     params: {
@@ -76,6 +94,9 @@ async function getCurrentByCoords(lat, lon) {
   return parseCurrentWeather(response.data);
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 function parseCurrentWeather(data) {
   return {
     city: data.name,
@@ -99,6 +120,9 @@ function parseCurrentWeather(data) {
   };
 }
 
+/**
+ * Author: Zhang Yuhan
+ */
 async function getOneCall(lat, lon) {
   const response = await api.get(ONECALL_URL, {
     params: {

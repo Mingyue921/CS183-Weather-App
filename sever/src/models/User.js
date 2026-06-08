@@ -54,6 +54,9 @@ userSchema.pre('save', async function () {
 });
 
 // 验证密码
+/**
+ * Author: Chen Chuqi
+ */
 userSchema.methods.comparePassword = function (candidate) {
   return bcrypt.compare(candidate, this.password);
 };

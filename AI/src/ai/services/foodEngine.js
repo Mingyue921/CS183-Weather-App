@@ -1,3 +1,6 @@
+/**
+ * Author: Zhang Yuhan
+ */
 function recommend(temperature, weatherId, weatherMain) {
   const foods = [];
   const details = [];

@@ -4,6 +4,9 @@ const activityEngine = require('./activityEngine');
 const solarTerm = require('./solarTerm');
 const weatherCodes = require('../data/owmWeatherCodes.json');
 
+/**
+ * Author: Zhang Yuhan
+ */
 function generate(weatherData) {
   const { temperature, humidity, windSpeed, weatherId, weatherMain } = weatherData;
 

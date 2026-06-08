@@ -4,6 +4,9 @@ const bcrypt = require('bcryptjs');
 
 const STORE_PATH = path.join(__dirname, 'data', 'users.local.json');
 
+/**
+ * Author: Chen Chuqi
+ */
 async function readStore() {
   try {
     const raw = await fs.readFile(STORE_PATH, 'utf8');
@@ -13,11 +16,17 @@ async function readStore() {
   }
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 async function writeStore(store) {
   await fs.mkdir(path.dirname(STORE_PATH), { recursive: true });
   await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2), 'utf8');
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 function toPublicUser(user) {
   return {
     id: user.userId,
@@ -28,6 +37,9 @@ function toPublicUser(user) {
   };
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 async function createUser({ email, password, nickname }) {
   const store = await readStore();
   const normalizedEmail = email.trim().toLowerCase();
@@ -54,16 +66,25 @@ async function createUser({ email, password, nickname }) {
   return user;
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 async function findByEmail(email) {
   const store = await readStore();
   return store.users.find(user => user.email === email.trim().toLowerCase()) || null;
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 async function findById(userId) {
   const store = await readStore();
   return store.users.find(user => user.userId === userId) || null;
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 async function updateUser(userId, updates) {
   const store = await readStore();
   const index = store.users.findIndex(user => user.userId === userId);
@@ -78,6 +99,9 @@ async function updateUser(userId, updates) {
   return store.users[index];
 }
 
+/**
+ * Author: Chen Chuqi
+ */
 async function comparePassword(user, password) {
   return bcrypt.compare(password, user.password);
 }

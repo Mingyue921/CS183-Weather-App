@@ -5,6 +5,9 @@ const auth = require('../middleware/auth');
 const localUsers = require('../localUserStore');
 const router = express.Router();
 
+/**
+ * Author: Chen Chuqi
+ */
 const toPublicUser = (user) => ({
   id: user.userId,
   mongoId: user._id,
@@ -15,6 +18,9 @@ const toPublicUser = (user) => ({
 });
 
 // POST /api/auth/register
+/**
+ * Author: Chen Chuqi
+ */
 router.post('/register', async (req, res) => {
   try {
     const { email, password, nickname } = req.body;
@@ -55,6 +61,9 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/auth/login
+/**
+ * Author: Chen Chuqi
+ */
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -100,6 +109,9 @@ router.post('/login', async (req, res) => {
 });
 
 // GET /api/auth/me
+/**
+ * Author: Chen Chuqi
+ */
 router.get('/me', auth, async (req, res) => {
   try {
     if (req.user.local || !req.app.locals.dbReady) {
@@ -117,6 +129,9 @@ router.get('/me', auth, async (req, res) => {
 });
 
 // PATCH /api/auth/me
+/**
+ * Author: Chen Chuqi
+ */
 router.patch('/me', auth, async (req, res) => {
   try {
     const { nickname, avatarUrl } = req.body;

@@ -9,6 +9,9 @@ const api = axios.create({
   timeout: 15000,
 });
 
+/**
+ * Author: Zhang Yuhan
+ */
 async function chat(messages) {
   const response = await api.post(
     `${BASE_URL}/v1/chat/completions`,

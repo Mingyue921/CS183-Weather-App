@@ -1,5 +1,8 @@
 import Animated from 'react-native-reanimated';
 
+/**
+ * Author: Zhao YueXuan
+ */
 export function HelloWave() {
   return (
     <Animated.Text

@@ -1,5 +1,8 @@
 const weatherCodes = require('../data/owmWeatherCodes.json');
 
+/**
+ * Author: Zhang Yuhan
+ */
 function buildWeatherResponse(weatherData, uv, air) {
   return {
     temperature: weatherData.temperature,
