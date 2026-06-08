@@ -5,7 +5,7 @@ import './AiHelper.css';
 const iconBase = '/img/105';
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 function AiHelper() {
   const [msg, setMsg] = useState('');
@@ -20,7 +20,7 @@ function AiHelper() {
   ];
 
   /**
-   * Author: Huang Yichen
+   * Author: Huang Xinlei
    */
   const sendMessage = async () => {
     const text = msg.trim();

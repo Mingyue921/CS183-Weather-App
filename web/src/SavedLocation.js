@@ -6,7 +6,7 @@ const iconBase = '/img/105';
 const amapKey = process.env.REACT_APP_WEATHER_KEY;
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 function SavedLocation() {
   const [query, setQuery] = useState('');
@@ -18,7 +18,7 @@ function SavedLocation() {
   // 关键：监听收藏变化事件
   useEffect(() => {
     /**
-     * Author: Huang Yichen
+     * Author: Huang Xinlei
      */
     const handleFavoritesChanged = () => {
       const local = readLocalFavorites();
@@ -58,7 +58,7 @@ function SavedLocation() {
   }, [favorites]);
 
   /**
-   * Author: Huang Yichen
+   * Author: Huang Xinlei
    */
   const addFavorite = async (event) => {
     event.preventDefault();
@@ -80,7 +80,7 @@ function SavedLocation() {
   };
 
   /**
-   * Author: Huang Yichen
+   * Author: Huang Xinlei
    */
   const removeFavorite = async (city) => {
     const newFavs = favorites.filter((item) => item !== city);
@@ -162,7 +162,7 @@ function SavedLocation() {
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 async function fetchCityWeather(city) {
   const backendWeather = await fetchBackendWeather(city);
@@ -171,7 +171,7 @@ async function fetchCityWeather(city) {
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 async function fetchBackendWeather(city) {
   try {
@@ -198,7 +198,7 @@ async function fetchBackendWeather(city) {
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 async function fetchAmapWeather(city) {
   if (!amapKey) return null;
@@ -229,7 +229,7 @@ async function fetchAmapWeather(city) {
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 function readLocalFavorites() {
   try {
@@ -240,21 +240,21 @@ function readLocalFavorites() {
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 function normalizeFavorites(value) {
   return uniqueCities(Array.isArray(value) ? value : []);
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 function uniqueCities(cities) {
   return [...new Set(cities.map((city) => String(city).trim()).filter(Boolean))];
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 function formatDate(timestamp) {
   const date = timestamp ? new Date(timestamp * 1000) : new Date();
@@ -265,7 +265,7 @@ function formatDate(timestamp) {
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 function normalizeDescription(description = 'Sunny') {
   const lower = String(description).toLowerCase();
@@ -276,7 +276,7 @@ function normalizeDescription(description = 'Sunny') {
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 function getWeatherIcon(description = '') {
   const lower = String(description).toLowerCase();
@@ -287,7 +287,7 @@ function getWeatherIcon(description = '') {
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 function toWindForce(speed = 0) {
   const value = Number(speed);
@@ -296,7 +296,7 @@ function toWindForce(speed = 0) {
 }
 
 /**
- * Author: Huang Yichen
+ * Author: Huang Xinlei
  */
 function getAirQuality(value = 60) {
   const humidity = Number(value);
