@@ -110,11 +110,12 @@ router.post('/chat', async (req, res) => {
       }
 
       if (weatherData) {
-        [uv, air] = await Promise.all([
+        const [uvSettled, airSettled] = await Promise.allSettled([
           openweather.getUVIndex(weatherData.lat, weatherData.lon),
           openweather.getAirQuality(weatherData.lat, weatherData.lon),
         ]);
-
+        uv = uvSettled.status === 'fulfilled' ? uvSettled.value : null;
+        air = airSettled.status === 'fulfilled' ? airSettled.value : null;
         localAdvice = fallbackEngine.generate({
           temperature: weatherData.temperature,
           humidity: weatherData.humidity,
