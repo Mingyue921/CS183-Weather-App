@@ -37,9 +37,6 @@ const mockCurrentWeather = {
 const mockUV = { value: 5.2, level: 'Moderate' };
 const mockAir = { aqi: 2, level: 'Fair', components: { pm2_5: 12.0, pm10: 25.0 } };
 
-/**
- * Author: Zhang Yuhan
- */
 function makeMockDaily(index) {
   const baseTemp = 23 + index;
   return {
@@ -93,15 +90,12 @@ beforeEach(() => {
 
   deepseek.chat.mockResolvedValue(mockAIResponse);
 
-  cache.get.mockReturnValue(null);
+  cache.getStale.mockReturnValue(null);
   cache.set.mockImplementation(() => {});
 
   solarTerm.getTermName.mockReturnValue('Summer Begins');
 });
 
-/**
- * Author: Zhang Yuhan
- */
 function findPostHandler(routerInstance) {
   for (const layer of routerInstance.stack) {
     if (layer.route && layer.route.path === '/advice' && layer.route.methods.post) {
@@ -207,7 +201,7 @@ describe('Integration — POST /api/ai/advice', () => {
 
   test('uses cache on second call', async () => {
     const cachedResponse = { cached: true, temperature: 22.5 };
-    cache.get.mockReturnValue(cachedResponse);
+    cache.getStale.mockReturnValue({ data: cachedResponse, stale: false });
 
     const handler = findPostHandler(router);
     const req = { body: { city: 'Beijing' } };
