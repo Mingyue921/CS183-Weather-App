@@ -10,9 +10,6 @@ const cache = require('../services/cache');
 const solarTerm = require('../services/solarTerm');
 const weatherCodes = require('../data/owmWeatherCodes.json');
 
-/**
- * Author: Zhang Yuhan
- */
 function buildAdvicePrompt(weatherData, forecastDays, uv, air, termName) {
   const weatherName = weatherCodes[String(weatherData.weatherId)] || weatherData.weatherMain;
   const summary = (forecastDays && forecastDays.length > 0)
@@ -44,9 +41,41 @@ Please reply in English with exactly four sections, each 1-3 sentences only:
 4. Food Advice: what to eat or drink to stay comfortable in this weather`;
 }
 
-/**
- * Author: Zhang Yuhan
- */
+function buildResult(currentWeather, forecastDays, uvResult, airResult, clothing, food, activity, termName, aiAdvice, stale) {
+  const condition = weatherCodes[String(currentWeather.weatherId)] || currentWeather.weatherMain;
+
+  const result = {
+    temperature: currentWeather.temperature,
+    humidity: currentWeather.humidity,
+    windSpeed: currentWeather.windSpeed,
+    windDirection: currentWeather.windDirection,
+    uv: uvResult ? { value: uvResult.value, level: uvResult.level } : null,
+    airQuality: airResult ? { aqi: airResult.aqi, level: airResult.level } : null,
+    feelsLike: currentWeather.feelsLike,
+    tempMin: currentWeather.tempMin,
+    tempMax: currentWeather.tempMax,
+    condition,
+    forecast7Days: forecastDays,
+    clothingAdvice: clothing.advice,
+    clothingDetails: clothing.details,
+    outingAdvice: activity.outdoorSuitable
+      ? 'Conditions are suitable for going out.'
+      : 'Not ideal for outdoor activities. Consider staying indoors.',
+    outingWarnings: activity.warnings,
+    activityAdvice: activity.activities,
+    foodAdvice: food.foods,
+    foodDetails: food.details,
+    solarTerm: termName,
+    aiAdvice,
+  };
+
+  if (stale) {
+    result.stale = true;
+  }
+
+  return result;
+}
+
 router.post('/advice', async (req, res, next) => {
   try {
     const { city } = req.body;
@@ -55,16 +84,33 @@ router.post('/advice', async (req, res, next) => {
     }
 
     const cacheKey = `advice:${city}`;
-    const cached = cache.get(cacheKey);
-    if (cached) {
-      return res.json(cached);
+
+    // 1. Check cache for fresh / stale data
+    const cachedEntry = cache.getStale(cacheKey);
+    const staleData = cachedEntry ? cachedEntry.data : null;
+    const isStale = cachedEntry ? cachedEntry.stale : false;
+
+    // Fresh cache → return immediately, no API calls
+    if (staleData && !isStale) {
+      return res.json(staleData);
     }
+
+    // 2. Either no cache or stale cache — call external APIs to refresh
+    //    If staleData exists, we keep it as fallback in case APIs fail
+    // amap.geocode() internally has permanent cache → "first" call for
+    // popular cities still skips the Amap HTTP round-trip
 
     let geo;
     try {
       geo = await amap.geocode(city);
     } catch (err) {
       console.error('Amap geocode error:', err.response?.status, err.message);
+
+      // Amap failed → fallback to staleData
+      if (staleData) {
+        return res.json({ ...staleData, stale: true });
+      }
+
       return res.status(502).json({ error: 'Failed to geocode city. Please check the city name.' });
     }
 
@@ -75,8 +121,14 @@ router.post('/advice', async (req, res, next) => {
       openweather.getAirQuality(geo.lat, geo.lon),
     ]);
 
+    // 3. OWM current weather failed → fallback to staleData
     if (weatherData.status === 'rejected') {
       console.error('OWM current weather error:', weatherData.reason.response?.status, weatherData.reason.message);
+
+      if (staleData) {
+        return res.json({ ...staleData, stale: true });
+      }
+
       return res.status(502).json({ error: `Weather API error: ${weatherData.reason.response?.status || 'network'}` });
     }
 
@@ -121,32 +173,7 @@ router.post('/advice', async (req, res, next) => {
       aiAdvice = null;
     }
 
-    const condition = weatherCodes[String(currentWeather.weatherId)] || currentWeather.weatherMain;
-
-    const result = {
-      temperature: currentWeather.temperature,
-      humidity: currentWeather.humidity,
-      windSpeed: currentWeather.windSpeed,
-      windDirection: currentWeather.windDirection,
-      uv: uvResult ? { value: uvResult.value, level: uvResult.level } : null,
-      airQuality: airResult ? { aqi: airResult.aqi, level: airResult.level } : null,
-      feelsLike: currentWeather.feelsLike,
-      tempMin: currentWeather.tempMin,
-      tempMax: currentWeather.tempMax,
-      condition,
-      forecast7Days: forecastDays,
-      clothingAdvice: clothing.advice,
-      clothingDetails: clothing.details,
-      outingAdvice: activity.outdoorSuitable
-        ? 'Conditions are suitable for going out.'
-        : 'Not ideal for outdoor activities. Consider staying indoors.',
-      outingWarnings: activity.warnings,
-      activityAdvice: activity.activities,
-      foodAdvice: food.foods,
-      foodDetails: food.details,
-      solarTerm: termName,
-      aiAdvice,
-    };
+    const result = buildResult(currentWeather, forecastDays, uvResult, airResult, clothing, food, activity, termName, aiAdvice, false);
 
     cache.set(cacheKey, result);
     res.json(result);
