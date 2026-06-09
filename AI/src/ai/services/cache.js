@@ -1,25 +1,44 @@
 class Cache {
-  constructor(ttlMs = 5* 60 * 1000) {
+  constructor(ttlMs = 5 * 60 * 1000, maxSize = 500) {
     this.store = new Map();
     this.ttlMs = ttlMs;
+    this.maxSize = maxSize;
   }
+
 
   get(key) {
     const entry = this.store.get(key);
     if (!entry) return null;
-    if (Date.now() - entry.timestamp > this.ttlMs) {
-      this.store.delete(key);
-      return null;
-    }
-    return entry.value;
+
+    const age = Date.now() - entry.timestamp;
+    const stale = age > this.ttlMs;
+
+    return { data: entry.value, stale };
+  }
+
+  getStale(key) {
+    return this.get(key);
   }
 
   set(key, value) {
+    this.evictIfNeeded();
     this.store.set(key, { value, timestamp: Date.now() });
   }
 
+  
+  evictIfNeeded() {
+    while (this.store.size >= this.maxSize) {
+      const oldestKey = this.store.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.store.delete(oldestKey);
+      } else {
+        break;
+      }
+    }
+  }
+
   has(key) {
-    return this.get(key) !== null;
+    return this.store.has(key);
   }
 
   delete(key) {
