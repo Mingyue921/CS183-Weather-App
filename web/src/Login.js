@@ -5,7 +5,7 @@ import './Login.css';
 
 // 关键：接收 setIsLogin 和 setUser 两个 props
 /**
- * Author: Yang Qiyuan
+ * Author: Huang Yichen
  */
 export default function Login({ setIsLogin, setUser }) {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function Login({ setIsLogin, setUser }) {
   const [submitting, setSubmitting] = useState(false);
 
   /**
-   * Author: Yang Qiyuan
+   * Author: Huang Yichen
    */
   const handleSubmit = async () => {
     if (!email.trim() || !password) {

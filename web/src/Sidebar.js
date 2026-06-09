@@ -14,7 +14,7 @@ const menuItems = [
 
 // 关键：接收 isLogin、user、onLogout 三个 props
 /**
- * Author: Yang Qiyuan
+ * Author: Huang Yichen
  */
 const Sidebar = ({ isLogin, user, onLogout }) => {
   const navigate = useNavigate();

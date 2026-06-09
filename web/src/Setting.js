@@ -41,7 +41,7 @@ const settingRows = [
 ];
 
 /**
- * Author: Yang Qiyuan
+ * Author: Huang Yichen
  */
 function getStoredUser() {
   try {
@@ -52,7 +52,7 @@ function getStoredUser() {
 }
 
 /**
- * Author: Yang Qiyuan
+ * Author: Huang Yichen
  */
 function getWeatherContext() {
   try {
@@ -63,7 +63,7 @@ function getWeatherContext() {
 }
 
 /**
- * Author: Yang Qiyuan
+ * Author: Huang Yichen
  */
 export default function Setting({ isLogin, user }) {
   const navigate = useNavigate();
@@ -77,7 +77,7 @@ export default function Setting({ isLogin, user }) {
   const email = isLogin ? (user?.email || 'No email available') : '';
 
   /**
-   * Author: Yang Qiyuan
+   * Author: Huang Yichen
    */
   const openAdvice = async (item) => {
     const context = getWeatherContext();
