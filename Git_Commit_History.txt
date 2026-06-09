@@ -1,4 +1,18 @@
-﻿965e6fe 2026-06-02 ZYH-m23 Update README.md
+baab9d7 2026-06-09 ZYH-m23 Update aiChat.js
+55c3a7a 2026-06-09 ZYH-m23 Update amap.js
+7060f2e 2026-06-09 ZYH-m23 Update amap.js
+9fe8b5b 2026-06-09 ZYH-m23 Update cache.js
+2697474 2026-06-09 ZYH-m23 Update aiChat.js
+9000174 2026-06-09 ZYH-m23 Update aiAdvice.js
+09dfb59 2026-06-09 ZYH-m23 Update and rename ownWeatherCodes.json to cityCoords.json
+750b774 2026-06-09 ZYH-m23 Update integration.test.js
+2f9ca64 2026-06-08 Mingyue921 Add project video assets
+d5d23ec 2026-06-08 Mingyue921 Update web UI responsibility annotations
+62b9eb3 2026-06-08 Mingyue921 Add function author annotations
+a94b28f 2026-06-04 Mingyue921 Refine Yang Qiyuan's contributions in README
+6a92a81 2026-06-04 Mingyue921 Update team contributions in README.md
+c3d9c34 2026-06-03 Mingyue921 Add project files
+965e6fe 2026-06-02 ZYH-m23 Update README.md
 c40b02b 2026-06-02 3dfisnt Merge branch 'main' of https://github.com/Mingyue921/CS183-Weather-App
 5095871 2026-06-02 3dfisnt finish
 896b6b3 2026-05-31 Mingyue921 Improve mobile auth and AI advice display
@@ -17,55 +31,5 @@ d6c7f21 2026-05-27 Mingyue921 Connect web app to backend services
 2ad681d 2026-05-25 Mingyue921 Delete docs directory
 b737c73 2026-05-25 Mingyue921 Add AI weather code data
 de844ed 2026-05-25 Mingyue921 Integrate mobile weather and AI updates
-c42b61c 2026-05-23 榛剎l ai鐣岄潰瀹炵幇
+c42b61c 2026-05-23 Huang Xinlei ai interface implementation
 ba387af 2026-05-21 ZYH-m23 Add files via upload
-963f794 2026-05-21 ZYH-m23 Create layersEngine.test.js
-09b5016 2026-05-21 ZYH-m23 Add files via upload
-088ee03 2026-05-21 ZYH-m23 Create amap.js
-23a1eb6 2026-05-21 ZYH-m23 Delete AI/src/services directory
-a1ac06d 2026-05-21 ZYH-m23 Rename AI/ai/data/ownWeatherCodes.json to AI/src/ai/data/ownWeatherCodes.json
-3c9c37d 2026-05-21 ZYH-m23 Rename AI/src/routes/aiChat.js to AI/src/ai/routes/aiChat.js
-a20234e 2026-05-21 ZYH-m23 Rename AI/src/routes/aiAdvice.js to AI/src/ai/routes/aiAdvice.js
-7355cea 2026-05-21 ZYH-m23 Rename ownWeatherCodes.json to ownWeatherCodes.json
-b89d48d 2026-05-21 ZYH-m23 Rename AI/data/ownWeatherCodes.json to AI/data/ai/ownWeatherCodes.json
-f116d48 2026-05-21 ZYH-m23 Delete AI/.env
-4c0282a 2026-05-21 ZYH-m23 Rename AI/index.js to AI/src/index.js
-314aacc 2026-05-21 ZYH-m23 Rename AI/src/index.js to AI/index.js
-46759d5 2026-05-21 ZYH-m23 Add files via upload
-d91235a 2026-05-21 ZYH-m23 Create amap.js
-8a7d688 2026-05-21 ZYH-m23 Add files via upload
-0bef045 2026-05-21 ZYH-m23 Create aiAdvice.js
-bc3312e 2026-05-21 ZYH-m23 Create ownWeatherCodes.json
-39d7d95 2026-05-21 ZYH-m23 Create index.js
-6edb0f7 2026-05-21 ZYH-m23 Add files via upload
-25304df 2026-05-21 ZYH-m23 Create .env
-ec0ba36 2026-05-21 ZYH-m23 Delete AI/solarTerms.json
-8889e45 2026-05-21 ZYH-m23 Delete AI/finalApp.java
-695c665 2026-05-21 ZYH-m23 Delete AI/SolarTermMatcher.java
-fa1531a 2026-05-21 ZYH-m23 Delete AI/SolarTerm.java
-bb3e2a7 2026-05-21 Mingyue921 Add mobile auth alerts and AI features
-f268f9e 2026-05-19 3dfisnt finish setting
-ef49142 2026-05-16 3dfisnt finish dashboard
-3408294 2026-05-08 3dfisnt web 1.0
-ec8c873 2026-05-07 Chatree-Q feat: add backend server with Express, MongoDB, JWT auth
-19b36c6 2026-04-28 Mingyue921 Feat: implement 5-day forecast with horizontal scrolling UI
-3f98844 2026-04-27 ZYH-m23 Rename solarTerms.json to AI/solarTerms.json
-df72100 2026-04-27 ZYH-m23 Rename finalApp.java to AI/finalApp.java
-517134f 2026-04-27 ZYH-m23 Rename SolarTermMatcher.java to AI/SolarTermMatcher.java
-1e792a8 2026-04-27 ZYH-m23 Rename SolarTerm.java to AI/SolarTerm.java
-34ffc6d 2026-04-27 ZYH-m23 AI
-678f3bc 2026-04-21 3dfisnt web鍓嶇澶╂皵鐪嬫澘寮€鍙戝畬鎴愶細瀹炵幇宸﹀彸鍒嗘爮Flex甯冨眬銆丱penWeatherMap API瀵规帴銆佸煄甯傛悳绱€佹敹钘忓す鎸佷箙鍖栵紝骞舵坊鍔?env.example妯℃澘瑙勮寖鍥㈤槦閰嶇疆
-1496a3c 2026-04-19 Mingyue921 Feat: add weather icons and favorites functionality with AsyncStorage
-e983314 2026-04-18 Mingyue921 feat: implement weather search and update gitignore
-e7b22c8 2026-04-18 Mingyue921 Feat: implement weather search logic in index.tsx
-5c19229 2026-04-17 xinleihuang149-svg Add: README
-521fae4 2026-04-11 Mingyue921 Create 1
-22628f7 2026-04-11 Mingyue921 Create 1
-611e5ec 2026-04-11 Mingyue921 Delete web/1
-fa006e3 2026-04-11 Mingyue921 Create 1
-35e3eaf 2026-04-11 Mingyue921 Create README.md
-c8cccdf 2026-04-11 Mingyue921 Create README.md
-682a2f4 2026-04-11 Mingyue921 Delete mobile
-f2c6ab8 2026-04-11 Mingyue921 Create mobile
-a883d31 2026-04-11 Mingyue921 Remove project title from README.md
-055761e 2026-03-28 Mingyue921 Initial commit

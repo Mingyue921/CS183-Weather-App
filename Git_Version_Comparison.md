@@ -5,11 +5,11 @@
 This document compares the project between the `v1` tag and the `v2` tag.
 
 - **v1:** early prototype version
-- **v2:** final submitted version
+- **v2:** final implementation version after the latest AI service optimization
 
 The project evolved from a basic weather application prototype into a more complete smart weather and AI lifestyle assistant system. The comparison covers the mobile app, web app, backend server, AI service, testing, and deployment preparation.
 
-The main difference is that `v1` mainly demonstrated early weather search and basic UI functions, while `v2` provides an integrated cross-platform system with backend APIs, AI advice, user accounts, weather alerts, solar term culture, automated AI tests, and deployment files.
+The main difference is that `v1` mainly demonstrated early weather search and basic UI functions, while `v2` provides an integrated cross-platform system with backend APIs, AI advice, user accounts, weather alerts, solar term culture, automated AI tests, deployment files, and improved AI fault tolerance.
 
 ---
 
@@ -48,6 +48,7 @@ Main characteristics of `v2`:
 - 24 solar term culture module
 - Automated tests for AI service
 - Docker and deployment-related files
+- Improved AI service cache, geocoding fallback, and error handling
 
 ---
 
@@ -191,12 +192,12 @@ In `v2`, the AI service became more structured and functional. It includes:
 - OpenWeather service logic
 - Amap service logic
 - DeepSeek service logic
-- Cache logic
+- Cache logic with stale-data fallback
 - Clothing recommendation logic
 - Activity advice logic
 - Food advice logic
 - Fallback advice logic
-- Weather code data
+- Local city coordinate data for common city geocoding
 - Automated tests
 
 The AI service can generate weather-based advice for:
@@ -210,7 +211,17 @@ It also includes fallback behavior when AI requests fail.
 
 ### AI Improvement Summary
 
-The AI part improved from early prototype logic into a structured service. It now supports AI chat, lifestyle advice, weather-based recommendation logic, fallback handling, and automated tests.
+The AI part improved from early prototype logic into a structured service. It now supports AI chat, lifestyle advice, weather-based recommendation rules, fallback handling, and automated tests.
+
+The latest AI optimization further improved reliability:
+
+- `ownWeatherCodes.json` was replaced by `cityCoords.json` for local city coordinate lookup.
+- Amap geocoding now uses an in-memory coordinate cache and can return local coordinates for common cities without always depending on an external Amap request.
+- The AI advice cache now keeps stale entries instead of simply deleting expired data.
+- If Amap geocoding or OpenWeather current weather fails but stale advice data exists, the AI advice route can return stale fallback data with a `stale` flag.
+- The cache now has a maximum size to avoid unlimited memory growth.
+- AI chat now handles UV index and air quality requests with `Promise.allSettled`, so one failed optional weather request does not break the whole chat response.
+- Integration tests were updated to match the new cache behavior.
 
 ---
 
@@ -268,7 +279,7 @@ The automated tests cover:
 - Food advice logic
 - Activity advice logic
 - Weather data processing
-- Cache behavior
+- Cache behavior, including fresh and stale cache handling
 - Error handling
 - Fallback behavior when DeepSeek AI is unavailable
 
@@ -276,7 +287,7 @@ Web and mobile functions were tested manually through the main user flows and ve
 
 ### Testing Improvement Summary
 
-Testing improved from mostly manual checks to automated tests for important AI service logic. This provides stronger evidence that the AI recommendation logic works correctly.
+Testing improved from mostly manual checks to automated tests for important AI service logic. The latest integration test update also reflects the new stale-cache behavior. This provides stronger evidence that the AI advice logic and error handling work correctly.
 
 ---
 
@@ -315,12 +326,12 @@ The project improved from a local prototype toward a deployable system. The Dock
 | Account editing | Not implemented | Implemented |
 | Web app | Basic frontend/dashboard work | Backend-connected web interface |
 | Backend | Limited / not central | Central Express API service |
-| AI | Early prototype/data | Structured AI chat and advice service |
+| AI | Early prototype/data | Structured AI chat and advice service with cache and fallback improvements |
 | Weather alerts | Not implemented | Implemented |
 | Solar terms | Not complete | Complete mobile solar term module |
 | Tests | Limited | Jest tests for AI service |
 | Deployment | Not ready | Docker and deployment files added |
-| Error handling | Basic | Improved fallback and unavailable states |
+| Error handling | Basic | Improved fallback, stale-cache recovery, and unavailable states |
 
 ---
 
@@ -330,7 +341,7 @@ The difference between `v1` and `v2` is significant.
 
 In `v1`, the project was mainly an early prototype. The mobile app supported basic weather search, current temperature display, weather icons, and local favorite cities. Other parts such as backend integration, AI advice, solar terms, testing, and deployment were still incomplete.
 
-In `v2`, the project became a complete smart weather and AI lifestyle assistant system. It includes a web app, mobile app, backend server, AI service, user accounts, weather alerts, favorite city management, AI chat, AI lifestyle advice, 24 solar term culture pages, automated AI tests, and deployment files.
+In `v2`, the project became a complete smart weather and AI lifestyle assistant system. It includes a web app, mobile app, backend server, AI service, user accounts, weather alerts, favorite city management, AI chat, AI lifestyle advice, 24 solar term culture pages, automated AI tests, deployment files, and improved AI fallback behavior.
 
 The main improvement is that the project evolved from a basic weather lookup prototype into an integrated cross-platform system. The `v2` version is more complete, more reliable, easier to demonstrate, and closer to a real-world weather assistant application.
 
